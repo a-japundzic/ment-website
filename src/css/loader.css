@@ -1,0 +1,9 @@
+.bg {
+    position: static;
+    width: 450px;
+    height: 400px;
+    background-repeat: no-repeat;
+    background-position: center;
+    will-change: opacity;
+  }
+  
