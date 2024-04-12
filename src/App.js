@@ -12,8 +12,6 @@ import LoadingScreen from "./menteeFlow/LoadingScreen";
 
 
 
-
-
 function App() {
   return (
     <div>
