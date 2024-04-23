@@ -7,13 +7,8 @@ import Select from 'react-select'
 
 import LOGO from '../assets/logo.png'
 
-import { getCurrentUser } from 'aws-amplify/auth';
-import { generateClient } from 'aws-amplify/api';
-import * as mutations from '../graphql/mutations';
-import { listMenteeProfiles } from '../graphql/queries';
-
-
 const ProfileSetup1 = () => {
+    // Add this part here to every page you create, it handles submitting the data and navigating to the next page {
     const [state, setAppState] = useAppState();
     const { handleSubmit, 
             register,
@@ -23,83 +18,13 @@ const ProfileSetup1 = () => {
     const navigate = useNavigate();
 
     const saveData = (data) => {
-        // set state
         setAppState({...state, ...data });
-
-        // create the new record
-        // createRecord(data);
-
-        navigate("/personalInfo2")
+        // This navigates you to the next page when the next button is clicked
+        navigate("/personalInfo2") 
     };
-
-    // const client = generateClient();
-    // const [username, setUsername] = useState('');
-    // const [mentee, setMentee] = useState({});
-
-    // const loadUserData = useCallback(async () => {
-    //     const client = generateClient();
-
-    //     const variables = {
-    //         filter: {
-    //             owner: {
-    //                 contains: username
-    //             }
-    //         }
-    //     };
-
-    //     const currMentee = await client.graphql({
-    //         query: listMenteeProfiles,
-    //         variables: variables
-    //     });
-
-    //     setMentee(currMentee);
-    //     console.log(mentee.data.listMenteeProfiles.items[0].id);
-    // }, [mentee.data.listMenteeProfiles.items[0].id]);
-
-    // useEffect(() => {
-    //     currentAuthenticatedUser();
-    //     loadUserData();
-    //     console.log(mentee);
-    //     console.log(username);
-    // }, [mentee.data.listMenteeProfiles.items[0].id]);
-
-    // // Queries existing record
-    // // async function queryData() {
-
-    // // }
-
-    // // Creates new record
-    // async function createRecord(data) {
-    //     try {
-    //         const menteeDetails = {
-    //             firstName: data.menteeFirstName,
-    //             lastName: data.menteeLastName,
-    //             gender: data.menteeGender,
-    //             age: data.menteeAge,
-    //             ethnicity: data.menteeEthnicity,
-    //             location: data.menteeLocation,
-    //         };
-        
-    //         const newMentee = await client.graphql({
-    //             query: mutations.createMenteeProfile,
-    //             variables: { input: menteeDetails }
-    //         });
-
-    //         console.log(newMentee);
-    //     } catch (error) {
-    //         console.log("Error creaing profile", error);
-    //     }
     // }
 
-    // async function currentAuthenticatedUser() {
-    //     try {
-    //         const { username, userId, signInDetails } = await getCurrentUser();
-    //         setUsername(username);
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // }
-
+    // This part here is for the profile picture upload which isn't needed for the rest of the pages {
     const uploadedImage = React.useRef(null);
     const imageUploader = React.useRef(null);
   
@@ -115,7 +40,9 @@ const ProfileSetup1 = () => {
         reader.readAsDataURL(file);
       }
     };
+    // }
 
+    // If you need to make a drop down menu, you create the opitions like this {
     const genderOptions = [
         { value: 'woman', label: 'Woman'},
         { value: 'man', label: 'Man'},
@@ -187,7 +114,9 @@ const ProfileSetup1 = () => {
         { value: 'Hungarian', label: 'Hungarian' },
         { value: 'Farsi', label: 'Farsi' },
     ]
+    // }
 
+    // This styles the drop down menu, so include it if you need to use a drop down menu below
     const customStyles = {
         control: (provided, state) => ({
             ...provided,
@@ -196,6 +125,7 @@ const ProfileSetup1 = () => {
             boxShadow: state.isFocused ? '0 0 0px 4px #C2DAFF' : 'none',
         })
     };
+
 
     return (
         <div class="d-flex flex-column min-vh-100 justify-content-center">
@@ -208,6 +138,7 @@ const ProfileSetup1 = () => {
             </nav>
 
             <form onSubmit={handleSubmit(saveData)}>
+                {/* This is the progres bar, change the width % to change its length */}
                 <div class="container h-100">
                     <div class="row">
                         <div class="col">
@@ -216,6 +147,7 @@ const ProfileSetup1 = () => {
                             </div>
                         </div>
                     </div>
+                    {/* Here you can change title and sub title */}
                     <div class="row gx-5 mt-5">
                         <div class="col">
                             <h1 class="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
@@ -226,6 +158,8 @@ const ProfileSetup1 = () => {
                        
                         <p1 class="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us get to know you better.</p1>
                     </div>
+
+                    {/* This is the start of the two columns, this is where you can add your info*/}
                     <div class="row gx-5 gy-5 align-items-center mt-2">
                         <div class="col">
                             <div class="row">

@@ -1,0 +1,45 @@
+.container {
+    position: 'absolute';
+}
+
+.character--selected {
+    position: relative;
+}
+
+/* optionally hide placeholder (in case it overlaps the cursor) */
+.character--selected:not(.character--filled) {
+    color: white;
+}
+
+.character--selected:not(.character--filled)::after {
+    content: "";
+    width: 1px;
+    height: 25px;
+    background-color: #5685C9;
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: blink 1s infinite step-end;
+}
+
+.character {
+    border-width: 2px;
+    border-radius: 8px;
+    border-color: #5685C9;
+    color: #5685C9;
+    background-color: white;
+    height: 50px;
+    width: 50px;
+}
+
+
+@keyframes blink {
+    0% {
+    opacity: 1;
+    }
+    50% {
+    opacity: 0;
+    }
+}

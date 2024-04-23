@@ -63,7 +63,7 @@ const LoadingScreen = () => {
                     <div class="col">
                     </div>
 
-                    <div class="col offset-md-1 d-flex align-items-center justify-content-center">
+                    <div class="col offset-md-1 c">
                         {transitions((style, i) => (
                             <animated.div
                                 className='bg'

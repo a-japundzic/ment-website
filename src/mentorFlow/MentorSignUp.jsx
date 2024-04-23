@@ -9,9 +9,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAppState } from "../state";
 import { useForm } from "react-hook-form";
 
-import { signUp } from 'aws-amplify/auth';
-import { signIn } from 'aws-amplify/auth';
-
 const MenteeSignUp = () => {
     const [error, setError] = useState('');
 
@@ -25,55 +22,8 @@ const MenteeSignUp = () => {
 
     const saveData = (data) => {
         setState({...state, ...data });
-
-        console.log(data.menteeEmail);
-
-        // handleSignUp(data.menteeEmail, data.menteeEmail, data.menteePassword);
-        console.log(data.menteeEmail);
-        console.log(data.menteePassword);
-        handleSignIn(data.menteeEmail, data.menteePassword);
+        navigate("/passwordVerification", { replace: true });
     };
-
-    async function handleSignUp(username, email, password) {
-        try {
-            const { isSignUpComplete, userId, nextStep } = await signUp({
-                username,
-                password,
-                options: {
-                    userAttributes: {
-                        email,
-                    },
-                    autoSignIn: true
-                }
-            });
-    
-    
-            console.log(userId);
-            console.log(isSignUpComplete);
-            console.log(nextStep);
-
-            sessionStorage.setItem("username", username);
-
-            navigate("/passwordVerification", { replace: true });
-        } catch (error) {
-            error = error + '';
-            error = error.substr(error.indexOf(" ") + 1);
-
-            setError('Error signing up: ' + error);
-            console.log('error signing up:', error);
-        }
-    }
-
-    async function handleSignIn(username, password) {
-        console.log(username);
-        try {
-            const { isSignedIn, nextStep } = await signIn({ username, password });
-            navigate("/personalInfo", { replace: true });
-        } catch (error) {
-            console.log('error signing in', error);
-            navigate("/personalInfo", { replace: true });
-        }
-    }
 
 
     return (

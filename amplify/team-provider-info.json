@@ -17,6 +17,9 @@
           "appId": "d1k1haaipik6wy",
           "type": "cicd"
         }
+      },
+      "auth": {
+        "mentwebsite": {}
       }
     }
   }
