@@ -1,124 +1,248 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { useForm } from "react-hook-form";
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../state';
 
 import LOGO from '../assets/logo.png'
 import IMG from '../assets/menteePreferences2.png'
 
+import { getCurrentUser } from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
+import * as mutations from '../graphql/mutations';
+import { listMenteePreferences } from '../graphql/queries';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Oval } from 'react-loader-spinner';
+
 import '../css/checkbox.css'
 
+const client = generateClient();
+
 const MenteePreferences2 = () => {
-    const [state, setState] = useAppState();
-    const { handleSubmit, 
-            register,
-        } = useForm({ defaultValues: state, criteriaMode: "all" });
+    // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
+    const [username, setUsername] = useState('');
     const navigate = useNavigate();
 
+    // Profile picture url
+    const [loading, setLoading] = useState(false);
+
+    // Fetches the username of the current authenticated user
+    async function currentAuthenticatedUser() {
+        try {
+            const { username } = await getCurrentUser();
+            setUsername(username);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    // On every refresh, fetch the username of the current authenticated user
+    useEffect(() => {
+        currentAuthenticatedUser();
+    }, [username]);
+
+
+    // Fetches the current user based off the username given above
+    const {
+        data: menteePreferences,
+        isLoading,
+        isSuccess,
+    } = useQuery({
+        queryKey: ["menteePreferences"],
+        queryFn: async () => {
+            const variables = {
+                filter: {
+                    owner: {
+                        contains: username
+                    }
+                }
+            };
+
+            const response = await client.graphql({
+                query: listMenteePreferences,
+                variables: variables
+            });
+
+            let preferences = response?.data?.listMenteePreferences?.items;
+
+            if (preferences.length === 0) return null;
+
+            return preferences[0];
+        }
+    })
+
+    // ****************************************************************
+
+    // Handles the submission of the form
+    const [state, setAppState] = useAppState();
+    const { handleSubmit, 
+            register,
+            control,
+            formState: { errors },
+            reset
+        } = useForm({ defaultValues: state, criteriaMode: "all" });
+
     const saveData = (data) => {
-        setState({...state, ...data });
-        navigate("/menteePreferences3")
+        // set state
+        // console.log(data)
+        setAppState({...state, ...data });
+        // console.log(data);  
+        // If record exists, update, else, create a new one
+        updateRecord.mutate(data);
+    
     };
 
+    // Updates existing record
+    const updateRecord = useMutation({
+        mutationFn: async (data) => {
+            try {
+                const menteeInput = {
+                    id: menteePreferences.id,
+                    mentorshipType: data.mentorshipType,
+                    mentorshipFrequency: data.mentorshipFrequency,
+                };
+            
+                const updateMenteePreferences = await client.graphql({
+                    query: mutations.updateMenteePreferences,
+                    variables: { input: menteeInput }
+                });
+    
+                // console.log(updateMenteePreferences);
+            } catch (error) {
+                console.log("Error updating profile", error);
+            }
+        },
+        onSuccess:  () => {
+            navigate("/menteePreferences3", {replace: true});
+        },
+        onMutate: () => {
+            setLoading(true);
+        }
+    })
+
+    function atLeastOneTypeChecked(selected) {
+        return selected.length > 0;
+    }
+
+    function atLeastOneFrequencyChecked(selected) {
+        return selected.length > 0;
+    }
+
     return (
-        <div class="d-flex flex-column min-vh-100 justify-content-center">
-            <nav class="navbar fixed-top bg-white navbar-expand-lg">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">
-                        <img class="align-middle" src={LOGO} alt=""/>
+        <div className="d-flex flex-column min-vh-100 justify-content-center">
+            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="/">
+                        <img className="align-middle" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
 
             <form onSubmit={handleSubmit(saveData)}>
-                <div class="container h-100">
-                    <div class="row">
-                        <div class="col">
-                            <div class="progress" role="progressbar" >
-                                <div class="progress-bar" style={{width: "74%", backgroundColor: "#7DC478"}}></div>
+                {isSuccess && !isLoading && (
+                <div className="container h-100">
+                    <div className="row">
+                        <div className="col">
+                            <div className="progress" role="progressbar" >
+                                <div className="progress-bar" style={{width: "74%", backgroundColor: "#7DC478"}}></div>
                             </div>
                         </div>
                     </div>
-                    <div class="row gx-5 mt-5">
-                        <div class="col">
-                            <h1 class="tw-font-oceanwide">Your mentorship preferences.</h1>
+                    <div className="row gx-5 mt-5">
+                        <div className="col">
+                            <h1 className="tw-font-oceanwide">Your mentorship preferences.</h1>
                         </div>
-                        <div class="col">
-                            <button type="submit" class="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">Next</button>
-                            <Link to="/menteePreferences">
-                                <button class="float-end tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">{"<"}</button>
-                            </Link>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Next")}
+                            </button>
+                            <button onClick={() => {navigate('/menteePreferences', {replace: true})}} className="float-end tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">{"<"}</button>
                         </div>
                        
-                        <p1 class="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us pair you with the ideal mentor.</p1>
+                        <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us pair you with the ideal mentor.</p>
                     </div>
-                    <div class="row gx-5 gy-5 mt-1 align-items-center">
-                        <div class="col">
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeTypeInput" class="form-label tw-font-dmsans">What mentorship are you looking for?</label>
-                                    <ul class="list-group mt-1" id="menteeTypeInput">
-                                        <label class="list-group-item tw-font-dmsans">
+                    <div className="row gx-5 gy-5 mt-1 align-items-center">
+                        <div className="col">
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeTypeInput" className="form-label tw-font-dmsans">What mentorship are you looking for?</label>
+                                    <ul className="list-group mt-1" id="menteeTypeInput">
+                                        <label className="list-group-item tw-font-dmsans">
                                             <input 
-                                                {...register("Career mentorship")}
-                                                type="checkbox" class="me-2 tw-font-dmsans"
+                                                {...register("mentorshipType", {
+                                                    validate: atLeastOneTypeChecked,
+                                                })}
+                                                value="Career mentorship"
+                                                type="checkbox" className="me-2 tw-font-dmsans" defaultChecked={(menteePreferences?.mentorshipType && !state?.mentorshipType) ? menteePreferences.mentorshipType.includes("Career mentorship") : false}
                                             />
                                             Career mentorship
                                         </label>
-                                        <label class="list-group-item tw-font-dmsans">
+                                        <label className="list-group-item tw-font-dmsans">
                                             <input 
-                                                {...register("Academic mentorship")}
-                                                type="checkbox" class="me-2 tw-font-dmsans"
+                                                {...register("mentorshipType")}
+                                                value={"Academic mentorship"}
+                                                type="checkbox" className="me-2 tw-font-dmsans" defaultChecked={(menteePreferences?.mentorshipType && !state?.mentorshipType) ? menteePreferences.mentorshipType.includes("Academic mentorship") : false}
                                             />
                                             Academic mentorship
                                         </label>
-
                                     </ul>
+                                    {errors.mentorshipType && (
+                                        <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>At least one selection is required.</small></p>
+                                    )}
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <hr class="hr" /> 
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <hr className="hr" /> 
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeFrequency" class="form-label tw-font-dmsans">How frequently do you want to meet your mentor?</label>
-                                    <ul class="list-group mt-1" id="menteeFrequency">
-                                        <label class="list-group-item tw-font-dmsans">
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeFrequency" className="form-label tw-font-dmsans">How frequently do you want to meet your mentor?</label>
+                                    <ul className="list-group mt-1" id="menteeFrequency">
+                                        <label className="list-group-item tw-font-dmsans">
                                             <input 
-                                                {...register("Weekly")}
-                                                type="checkbox" class="me-2 tw-font-dmsans"
+                                                {...register("mentorshipFrequency", {
+                                                    validate: atLeastOneFrequencyChecked,
+                                                })}
+                                                value={"Weekly"}
+                                                type="checkbox" className="me-2 tw-font-dmsans" defaultChecked={(menteePreferences?.mentorshipFrequency && !state?.mentorshipFrequency) ? menteePreferences.mentorshipFrequency.includes("Weekly") : false}
                                             />
                                             Weekly
                                         </label>
-                                        <label class="list-group-item tw-font-dmsans">
+                                        <label className="list-group-item tw-font-dmsans">
                                             <input 
-                                                {...register("Bi-weekly")}
-                                                type="checkbox" class="me-2 tw-font-dmsans"
+                                                {...register("mentorshipFrequency")}
+                                                value={"Bi-weekly"}
+                                                type="checkbox" className="me-2 tw-font-dmsans" defaultChecked={(menteePreferences?.mentorshipFrequency && !state?.mentorshipFrequency) ? menteePreferences.mentorshipFrequency.includes("Bi-weekly") : false}
                                             />
                                             Bi-weekly
                                         </label>
-                                        <label class="list-group-item tw-font-dmsans">
+                                        <label className="list-group-item tw-font-dmsans">
                                             <input 
-                                                {...register("Monthly")}
-                                                type="checkbox" class="me-2 tw-font-dmsans"
+                                                {...register("mentorshipFrequency")}
+                                                value={"Monthly"}
+                                                type="checkbox" className="me-2 tw-font-dmsans" defaultChecked={(menteePreferences?.mentorshipFrequency && !state?.mentorshipFrequency) ? menteePreferences.mentorshipFrequency.includes("Monthly") : false}
                                             />
                                             Monthly
                                         </label>
                                     </ul>
+                                    {errors.mentorshipFrequency && (
+                                        <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>At least one selection is required.</small></p>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col offset-md-1 d-flex align-items-center justify-content-center">
-                            <img class="img-fluid" src={IMG} alt=""></img>
+                        <div className="col offset-md-1 d-flex align-items-center justify-content-center">
+                            <img className="img-fluid" src={IMG} alt=""></img>
                         </div>
                     </div>
                 </div>
+                )}
             </form>
         </div>
     )

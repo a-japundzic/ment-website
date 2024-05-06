@@ -19,7 +19,24 @@
         }
       },
       "auth": {
+        "mentwebsite": {},
+        "userPoolGroups": {}
+      },
+      "api": {
         "mentwebsite": {}
+      },
+      "storage": {
+        "s3mentwebsitestorage18902879": {}
+      },
+      "function": {
+        "matchfunction": {
+          "deploymentBucketName": "amplify-mentwebsite-dev-33243-deployment",
+          "s3Key": "amplify-builds/matchfunction-717a4a34743835674d70-build.zip"
+        },
+        "test": {
+          "deploymentBucketName": "amplify-mentwebsite-dev-33243-deployment",
+          "s3Key": "amplify-builds/test-44695564303648544657-build.zip"
+        }
       }
     }
   }

@@ -1,25 +1,149 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { Controller, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message"
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../state';
 import Select from 'react-select'
 
 import LOGO from '../assets/logo.png'
 import IMG from '../assets/mentorEducation.png'
 
+import { getCurrentUser } from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
+import * as mutations from '../graphql/mutations';
+import { listMenteeProfiles } from '../graphql/queries';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Oval } from 'react-loader-spinner';
+
+const client = generateClient();
+
 const Education = () => {
-    const [state, setState] = useAppState();
-    const { handleSubmit, 
-            control,
-            formState: { errors },
-        } = useForm({ defaultValues: state, criteriaMode: "all" });
+    // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
+    const [username, setUsername] = useState('');
     const navigate = useNavigate();
 
+    const [loading, setLoading] = useState(false);
+
+    const [state, setAppState] = useAppState();
+
+    // Fetches the username of the current authenticated user
+    async function currentAuthenticatedUser() {
+        try {
+            const { username } = await getCurrentUser();
+            setUsername(username);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    // On every refresh, fetch the username of the current authenticated user
+    useEffect(() => {
+        currentAuthenticatedUser();
+    }, [username]);
+
+
+    // Fetches the current user based off the username given above
+    const {
+        data: userProfile,
+        isLoading,
+        isSuccess,
+    } = useQuery({
+        queryKey: ["userProfile"],
+        queryFn: async () => {
+            const variables = {
+                filter: {
+                    owner: {
+                        contains: username
+                    }
+                }
+            };
+
+            const response = await client.graphql({
+                query: listMenteeProfiles,
+                variables: variables
+            });
+
+            let completeProfile = response?.data?.listMenteeProfiles?.items;
+
+            if (!completeProfile) return null;
+        
+            return completeProfile;
+        }
+    })
+
+    // ****************************************************************
+
+    // Handles the submission of the form
+    const { handleSubmit, 
+        control,
+        formState: { errors },
+        reset
+    } = useForm({defaultValues: state, criteriaMode: "all" });
+
     const saveData = (data) => {
-        setState({...state, ...data });
-        navigate("/menteePreferences")
+        // set state
+        setAppState({...state, ...data });
+
+        // If record exists, update, else, create a new one
+        updateRecord.mutate(data);
     };
+
+    // Updates existing record
+    const updateRecord = useMutation({
+        mutationFn: async (data) => {
+            try {
+                const menteeDetails = {
+                    id: userProfile[0].id,
+                    schoolName: data.menteeUniversity.value,
+                    programOfStudy: data.menteeProgram.value,
+                    educationLevel: data.menteeEducationalLevel.value,
+                    graduationYear: data.menteeGraduationYear.value,
+                };
+            
+                const updateMentee = await client.graphql({
+                    query: mutations.updateMenteeProfile,
+                    variables: { input: menteeDetails }
+                });
+            } catch (error) {
+                console.log("Error updating profile", error);
+            }
+        },
+        onSuccess:  () => {
+            navigate("/menteePreferences", {replace: true});
+        },
+        onMutate: () => {
+            setLoading(true);
+        }
+    })
+
+    // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
+    useEffect(() => {
+        if (isSuccess && !state && userProfile[0].length > 0) {
+            const resetMenteeUniversity = educationalInstitution.find(op => {
+                return op.value === userProfile[0].schoolName
+            })
+
+            const resetMenteeProgram = program.find(op => {
+                return op.value === userProfile[0].programOfStudy
+            })
+
+            const resetMenteeEducationalLevel = educationLevel.find(op => {
+                return op.value === userProfile[0].educationLevel
+            })
+
+            const resetMenteeGraduationYear = graduationYear.find(op => {
+                return op.value === userProfile[0].graduationYear
+            })
+
+
+            reset({
+                menteeUniversity: resetMenteeUniversity,
+                menteeProgram: resetMenteeProgram,
+                menteeEducationalLevel: resetMenteeEducationalLevel,
+                menteeGraduationYear: resetMenteeGraduationYear,
+            })
+        }
+    }, [])
 
     const customStyles = {
         control: (provided, state) => ({
@@ -365,52 +489,58 @@ const Education = () => {
     ]
 
 
+
     return (
-        <div class="d-flex flex-column min-vh-100 justify-content-center">
-            <nav class="navbar fixed-top bg-white navbar-expand-lg">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">
-                        <img class="align-middle" src={LOGO} alt=""/>
+        <div className="d-flex flex-column min-vh-100 justify-content-center">
+            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="/">
+                        <img className="align-middle" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
 
             <form onSubmit={handleSubmit(saveData)}>
-                <div class="container h-100">
-                    <div class="row">
-                        <div class="col">
-                            <div class="progress" role="progressbar" >
-                                <div class="progress-bar" style={{width: "42%", backgroundColor: "#7DC478"}}></div>
+                {isSuccess && !isLoading && (
+                <div className="container h-100">
+                    <div className="row">
+                        <div className="col">
+                            <div className="progress" role="progressbar" >
+                                <div className="progress-bar" style={{width: "42%", backgroundColor: "#7DC478"}}></div>
                             </div>
                         </div>
                     </div>
-                    <div class="row gx-5 mt-5">
-                        <div class="col">
-                            <h1 class="tw-font-oceanwide">About your education</h1>
+                    <div className="row gx-5 mt-5">
+                        <div className="col">
+                            <h1 className="tw-font-oceanwide">About your education</h1>
                         </div>
-                        <div class="col">
-                            <button type="submit" class="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">Next</button>
-                            <Link to="/personalInfo2">
-                                <button class="float-end tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">{"<"}</button>
-                            </Link>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Next")}
+                            </button>
+                            <button onClick={() => {navigate('/personalInfo2', {replace: true})}} className="float-end tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">{"<"}</button>
                         </div>
                     
-                        <p1 class="tw-font-dmsans tm-text-[#5C667B] mt-2">Help us connect you with the right community of students!</p1>
+                        <p className="tw-font-dmsans tm-text-[#5C667B] mt-2">Help us connect you with the right community of students!</p>
                     </div>
-                    <div class="row gx-5 gy-5 align-items-center mt-2">
-                        <div class="col">
-                            <div class="row">
-                                <div class="col">
-                                    <label for="menteeUniversity" class="form-label tw-font-dmsans">I study at
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                    <div className="row gx-5 gy-5 align-items-center mt-2">
+                        <div className="col">
+                            <div className="row">
+                                <div className="col">
+                                    <label htmlFor="menteeUniversity" className="form-label tw-font-dmsans">I study at
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             rules={{
                                                 required: "Answer required",
                                             }}
                                             name="menteeUniversity"
+                                            defaultValue={educationalInstitution.find(op => {
+                                                return op.value === userProfile[0].schoolName
+                                            })}
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
                                             }) => (
@@ -436,24 +566,27 @@ const Education = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeUniversity"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeProgram" class="form-label tw-font-dmsans">My program of study is
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeProgram" className="form-label tw-font-dmsans">My program of study is
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             rules={{
                                                 required: "Answer required",
                                             }}
                                             name="menteeProgram"
+                                            defaultValue={program.find(op => {
+                                                return op.value === userProfile[0].programOfStudy
+                                            })}
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
                                             }) => (
@@ -479,24 +612,27 @@ const Education = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeProgram"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeEducationalLevel" class="form-label tw-font-dmsans">My education level is
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeEducationalLevel" className="form-label tw-font-dmsans">My education level is (currently enrolled/highest completed)
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             rules={{
                                                 required: "Answer required",
                                             }}
                                             name="menteeEducationalLevel"
+                                            defaultValue={educationLevel.find(op => {
+                                                return op.value === userProfile[0].educationLevel
+                                            })}
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
                                             }) => (
@@ -522,30 +658,33 @@ const Education = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeEducationalLevel"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <hr class="hr" /> 
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <hr className="hr" /> 
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeGraduationYear" class="form-label tw-font-dmsans">My expected graduation year is
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeGraduationYear" className="form-label tw-font-dmsans">My expected graduation year is
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             rules={{
                                                 required: "Answer required",
                                             }}
                                             name="menteeGraduationYear"
+                                            defaultValue={graduationYear.find(op => {
+                                                return op.value === userProfile[0].graduationYear
+                                            })}
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
                                             }) => (
@@ -571,18 +710,19 @@ const Education = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeGraduationYear"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col offset-md-1 d-flex align-items-center justify-content-center">
-                            <img class="img-fluid" src={IMG} alt=""></img>
+                        <div className="col offset-md-1 d-flex align-items-center justify-content-center">
+                            <img className="img-fluid" src={IMG} alt=""></img>
                         </div>
                     </div>
                 </div>
+                )}
             </form>
         </div>
     )

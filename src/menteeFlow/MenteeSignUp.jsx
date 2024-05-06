@@ -5,12 +5,10 @@ import LOGO from '../assets/logo.png'
 import IMG from '../assets/menteeLogInImg.png'
 import { useNavigate } from 'react-router-dom'
 
-
 import { useAppState } from "../state";
 import { useForm } from "react-hook-form";
 
 import { signUp } from 'aws-amplify/auth';
-import { signIn } from 'aws-amplify/auth';
 
 const MenteeSignUp = () => {
     const [error, setError] = useState('');
@@ -19,19 +17,15 @@ const MenteeSignUp = () => {
     const { handleSubmit, 
             register,
             formState: { errors },
+            watch,
+            getValues,
         } = useForm({ defaultValues: state, mode: "onSubmit", criteriaMode: "all" });
     const navigate = useNavigate();
     
 
     const saveData = (data) => {
         setState({...state, ...data });
-
-        console.log(data.menteeEmail);
-
-        // handleSignUp(data.menteeEmail, data.menteeEmail, data.menteePassword);
-        console.log(data.menteeEmail);
-        console.log(data.menteePassword);
-        handleSignIn(data.menteeEmail, data.menteePassword);
+        handleSignUp(data.menteeEmail, data.menteeEmail, data.menteePassword);
     };
 
     async function handleSignUp(username, email, password) {
@@ -42,60 +36,44 @@ const MenteeSignUp = () => {
                 options: {
                     userAttributes: {
                         email,
+                        "custom:user_type": "Mentee",
                     },
                     autoSignIn: true
                 }
             });
-    
-    
-            console.log(userId);
-            console.log(isSignUpComplete);
-            console.log(nextStep);
 
             sessionStorage.setItem("username", username);
 
             navigate("/passwordVerification", { replace: true });
         } catch (error) {
             error = error + '';
-            error = error.substr(error.indexOf(" ") + 1);
+            error = error.substring(error.indexOf(" ") + 1);
 
             setError('Error signing up: ' + error);
-            console.log('error signing up:', error);
-        }
-    }
-
-    async function handleSignIn(username, password) {
-        console.log(username);
-        try {
-            const { isSignedIn, nextStep } = await signIn({ username, password });
-            navigate("/personalInfo", { replace: true });
-        } catch (error) {
-            console.log('error signing in', error);
-            navigate("/personalInfo", { replace: true });
         }
     }
 
 
     return (
         <div>
-            <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
-                <nav class="navbar fixed-top bg-white navbar-expand-lg">
-                    <div class="container-fluid">
-                        <a class="navbar-brand" href="/">
-                            <img class="align-middle" src={LOGO} alt=""/>
+            <div className="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+                <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                    <div className="container-fluid">
+                        <a className="navbar-brand" href="/">
+                            <img className="align-middle" src={LOGO} alt=""/>
                         </a>
                     </div>
                 </nav>
 
                 <form onSubmit={handleSubmit(saveData)}>
-                    <div class="container h-100">
-                        <div class="row gx-5 gy-5 align-items-center">
-                            <div class="col">
-                                <h1 class="tw-font-oceanwide">Welcome to Ment</h1>
-                                <p1 class="tw-font-dmsans">Connect with a community of international students and receive personalized mentorship!</p1>
-                                <div class="mt-4">
-                                    <label for="menteeEmail" class="form-label tw-font-dmsans">Email
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                    <div className="container h-100">
+                        <div className="row gx-5 gy-5 align-items-center">
+                            <div className="col">
+                                <h1 className="tw-font-oceanwide">Welcome to Ment</h1>
+                                <p className="tw-font-dmsans">Connect with a community of international students and receive personalized mentorship!</p>
+                                <div className="mt-4">
+                                    <label htmlFor="menteeEmail" className="form-label tw-font-dmsans">Email
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <input 
                                         {...register("menteeEmail", {
@@ -105,7 +83,7 @@ const MenteeSignUp = () => {
                                                 message: "Invalid email address"
                                             }
                                         })}
-                                        type="email" class="form-control tw-font-dmsans py-2" id="menteeEmail" placeholder="Your email address" 
+                                        type="email" className="form-control tw-font-dmsans py-2" id="menteeEmail" placeholder="Your email address" 
                                     />
 
                                     <ErrorMessage 
@@ -114,14 +92,14 @@ const MenteeSignUp = () => {
                                         render={({ messages }) => 
                                             messages &&
                                             Object.entries(messages).map(([type, message]) => (
-                                                <p key={type} class="tw--mb-3 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
+                                                <p key={type} className="tw--mb-3 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
                                             ))
                                         }
                                     />
                                 </div>
-                                <div class="mt-3">
-                                    <label for="menteePassword" class="form-label tw-font-dmsans">Password
-                                        <p1 class="tw-ont-dmans tw-text-[#DE5840]">*</p1>
+                                <div className="mt-3">
+                                    <label htmlFor="menteePassword" className="form-label tw-font-dmsans">Password
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <input 
                                         {...register("menteePassword", {
@@ -131,9 +109,9 @@ const MenteeSignUp = () => {
                                                 message: "Should contain at least 8 characters, 1 number, and 1 special character"
                                             }
                                         })}
-                                        type="password" class="form-control tw-font-dmsans py-2" id="menteePassword" placeholder="Your password"
+                                        type="password" className="form-control tw-font-dmsans py-2" id="menteePassword" placeholder="Your password"
                                     />
-                                    {/* <div id="menteePassword" class="form-text tw-font-dmsans tw-text-[#5C667B]">
+                                    {/* <div id="menteePassword" className="form-text tw-font-dmsans tw-text-[#5C667B]">
                                         Should contain at least 8 characters and 1 number
                                     </div> */}
                                     <ErrorMessage 
@@ -142,36 +120,61 @@ const MenteeSignUp = () => {
                                         render={({ messages }) => 
                                             messages &&
                                             Object.entries(messages).map(([type, message]) => (
-                                                <p key={type} class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
+                                                <p key={type} className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
                                             ))
                                         }
                                     />
                                 </div>
-                                <div class="mt-4">
-                                    <button type="submit" style={{fontSize: "120%"}} class="rounded w-100 tw-text-white tw-font-dmsans mt-3 tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-[#5685C9] tw-bg-[#5685C9] tw-border-solid hover:tw-bg-white tw-duration-300">
+                                <div className="mt-3">
+                                    <input 
+                                        {...register("menteePasswordRepeat", {
+                                            required: "Repeat password is required",
+                                        })}
+                                        type="password" className="form-control tw-font-dmsans py-2" id="menteePasswordRepeat" placeholder="Repeat password"
+                                    />
+                                    {/* <div id="menteePassword" className="form-text tw-font-dmsans tw-text-[#5C667B]">
+                                        Should contain at least 8 characters and 1 number
+                                    </div> */}
+                                    <ErrorMessage 
+                                        errors={errors}
+                                        name="menteePasswordRepeat"
+                                        render={({ messages }) => 
+                                            messages &&
+                                            Object.entries(messages).map(([type, message]) => (
+                                                <p key={type} className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
+                                            ))
+                                        }
+                                    />
+
+                                    { watch("menteePasswordRepeat") !== watch("menteePassword") && getValues("menteePasswordRepeat") ? (
+                                         <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>Passwords do not match</small></p>
+                                    ) : null}
+                                </div>
+                                <div className="mt-4">
+                                    <button type="submit" style={{fontSize: "120%"}} className="rounded w-100 tw-text-white tw-font-dmsans mt-3 tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-[#5685C9] tw-bg-[#5685C9] tw-border-solid hover:tw-bg-white tw-duration-300">
                                         Sign Up
                                     </button>
-                                    <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{error}</small></p>
+                                    <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{error}</small></p>
                                 </div>
-                                <hr class="hr mt-5" />
+                                <hr className="hr mt-5" />
                                 <div>
-                                    <p1 class="tw-font-dmsans">
+                                    <p className="tw-font-dmsans">
                                         Already have an account? 
-                                        <a href='/' class="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
+                                        <a href='/' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
                                             Log In
                                         </a>
-                                    </p1>    
+                                    </p>    
                                 </div>
-                                {/* <div class="mt-5">
-                                    <label for="menteeLogInLabel" class="form-label tw-font-dmsans">Already have an account?</label>
-                                    <button id="menteeLogInLable" style={{fontSize: "120%"}} class="rounded w-100 tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-white tw-bg-white tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300" type="button">Log In</button>
+                                {/* <div className="mt-5">
+                                    <label htmlFor="menteeLogInLabel" className="form-label tw-font-dmsans">Already have an account?</label>
+                                    <button id="menteeLogInLable" style={{fontSize: "120%"}} className="rounded w-100 tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-white tw-bg-white tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300" type="button">Log In</button>
                                 </div> */}
-                                {/* <div class="mt-1">
-                                    <button style={{fontSize: "120%"}} class="rounded w-100 tw-text-black tw-font-dmsans mt-3 tw-border-[#5C667B] tw-border-1 tw-py-1 tw-px-5 tw-bg-white tw-border-solid" type="button">Log in with Google placeholder</button>
+                                {/* <div className="mt-1">
+                                    <button style={{fontSize: "120%"}} className="rounded w-100 tw-text-black tw-font-dmsans mt-3 tw-border-[#5C667B] tw-border-1 tw-py-1 tw-px-5 tw-bg-white tw-border-solid" type="button">Log in with Google placeholder</button>
                                 </div> */}
                             </div>
-                            <div class="col offset-md-1 d-flex align-items-center justify-content-center">
-                                <img class="img-fluid" src={IMG} alt=""></img>
+                            <div className="col offset-md-1 d-flex align-items-center justify-content-center">
+                                <img className="img-fluid" src={IMG} alt=""></img>
                             </div>
                         
                         </div>

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message"
 import { useNavigate } from 'react-router-dom';
@@ -11,95 +11,241 @@ import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import * as mutations from '../graphql/mutations';
 import { listMenteeProfiles } from '../graphql/queries';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getUrl, remove, uploadData } from 'aws-amplify/storage';
+import { Oval } from 'react-loader-spinner';
 
+
+const client = generateClient();
 
 const ProfileSetup1 = () => {
+    // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
+    const [username, setUsername] = useState('');
+    const navigate = useNavigate();
+
+    // Profile picture url
+    const [profileImgUrl, setProfileImgUrl] = useState('');
+    const [loading, setLoading] = useState(false);
+
     const [state, setAppState] = useAppState();
+
+    // Fetches the username of the current authenticated user
+    async function currentAuthenticatedUser() {
+        try {
+            const { username } = await getCurrentUser();
+            setUsername(username);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    // On every refresh, fetch the username of the current authenticated user
+    useEffect(() => {
+        currentAuthenticatedUser();
+    }, [username]);
+
+
+    // Fetches the current user based off the username given above
+    const {
+        data: userProfile,
+        isLoading,
+        isSuccess,
+    } = useQuery({
+        queryKey: ["userProfile"],
+        queryFn: async () => {
+            const variables = {
+                filter: {
+                    owner: {
+                        contains: username
+                    }
+                }
+            };
+
+            const response = await client.graphql({
+                query: listMenteeProfiles,
+                variables: variables
+            });
+
+            let completeProfile = response?.data?.listMenteeProfiles?.items;
+
+            if (!completeProfile) return null;
+
+            if(completeProfile[0]?.profilePicKey) {
+                // Format image url
+                const signedURL = await getUrl({ key: completeProfile[0].profilePicKey });
+                setProfileImgUrl(signedURL.url.toString());
+            } else {
+                setProfileImgUrl("");
+            }
+        
+
+            return completeProfile;
+        }
+    })
+
+    // ****************************************************************
+
+    // Handles the submission of the form
     const { handleSubmit, 
             register,
             control,
             formState: { errors },
-        } = useForm({ defaultValues: state, criteriaMode: "all" });
-    const navigate = useNavigate();
+            reset
+        } = useForm({defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
         // set state
         setAppState({...state, ...data });
 
-        // create the new record
-        // createRecord(data);
-
-        navigate("/personalInfo2")
+        // If record exists, update, else, create a new one
+        if (userProfile.length > 0) {
+            // update the current record
+            // updateRecord(data);
+            updateRecord.mutate(data);
+        } else {
+            // create a new record
+            createRecord.mutate(data);
+        }
+    
     };
 
-    // const client = generateClient();
-    // const [username, setUsername] = useState('');
-    // const [mentee, setMentee] = useState({});
+    // Creates new record
+    const createRecord = useMutation({
+        mutationFn: async (data) => {
+            try {
+                // Simplify the formatting of the user's ethnicity input
+                let menteeEthnicityArr = [];
+                var ethnicityArrayLen = data.menteeEthnicity.length;
+                for (var i = 0; i < ethnicityArrayLen; i++) {
+                    menteeEthnicityArr.push(data.menteeEthnicity[i].value);
+                }
+    
+                // Simplify the formatting of the user's lenguage input
+                let menteeLanguageArr = [];
+                var languageArrayLen = data.menteeLanguage.length;
+                for (var i = 0; i < languageArrayLen; i++) {
+                    menteeLanguageArr.push(data.menteeLanguage[i].value);
+                }
+    
+                const menteeDetails = {
+                    firstName: data.menteeFirstName,
+                    lastName: data.menteeLastName,
+                    gender: data.menteeGender.value,
+                    age: data.menteeAge,
+                    ethnicity: menteeEthnicityArr,
+                    languages: menteeLanguageArr,
+                };
+            
+                const newMentee = await client.graphql({
+                    query: mutations.createMenteeProfile,
+                    variables: { input: menteeDetails }
+                });
 
-    // const loadUserData = useCallback(async () => {
-    //     const client = generateClient();
+                let newMenteeFormatted = newMentee?.data?.createMenteeProfile
+                
+                // Upload the profile pic file:
+                const result = await uploadData({
+                    key: `${newMenteeFormatted.id}-${data.menteeProfilePicture.name}`,
+                    data: data.menteeProfilePicture,
+                    options: {
+                        contentType: 'image/png',
+                        accessLevel: 'protected',
+                    }
+                }).result;
 
-    //     const variables = {
-    //         filter: {
-    //             owner: {
-    //                 contains: username
-    //             }
-    //         }
-    //     };
+                const addProfilePic = {
+                    id: newMenteeFormatted.id,
+                    profilePicKey: result?.key,
+                };
+            
+                const updateMentee = await client.graphql({
+                    query: mutations.updateMenteeProfile,
+                    variables: { input: addProfilePic }
+                });
 
-    //     const currMentee = await client.graphql({
-    //         query: listMenteeProfiles,
-    //         variables: variables
-    //     });
+                // Retrieve the file's signed URL:
+                const updateMenteeFormatted = updateMentee?.data?.updateMenteeProfile;
+                const signedURL = await getUrl({ key: updateMenteeFormatted.profilePicKey });
+                setProfileImgUrl(signedURL.url.toString());
+            } catch (error) {
+                console.log("Error creating profile", error);
+            }
+        },
+        onSuccess:  () => {
+            navigate("/personalInfo2", {replace: true});
+        },
+        onMutate: () => {
+            setLoading(true);
+        }
+    })
 
-    //     setMentee(currMentee);
-    //     console.log(mentee.data.listMenteeProfiles.items[0].id);
-    // }, [mentee.data.listMenteeProfiles.items[0].id]);
 
-    // useEffect(() => {
-    //     currentAuthenticatedUser();
-    //     loadUserData();
-    //     console.log(mentee);
-    //     console.log(username);
-    // }, [mentee.data.listMenteeProfiles.items[0].id]);
+    // Updates existing record
+    const updateRecord = useMutation({
+        mutationFn: async (data) => {
+            try {
+                // Simplify the formatting of the user's ethnicity input
+                let menteeEthnicityArr = [];
+                var ethnicityArrayLen = data.menteeEthnicity.length;
+                for (var i = 0; i < ethnicityArrayLen; i++) {
+                    menteeEthnicityArr.push(data.menteeEthnicity[i].value);
+                }
+    
+                // Simplify the formatting of the user's lenguage input
+                let menteeLanguageArr = [];
+                var languageArrayLen = data.menteeLanguage.length;
+                for (var i = 0; i < languageArrayLen; i++) {
+                    menteeLanguageArr.push(data.menteeLanguage[i].value);
+                }
+    
+                // Upload the profile pic file:
+                const result = await uploadData({
+                    key: `${userProfile[0].id}-${data.menteeProfilePicture.name}`,
+                    data: data.menteeProfilePicture,
+                    options: {
+                        contentType: 'image/png',
+                        accessLevel: 'protected',
+                    }
+                }).result;
+    
+                if (userProfile[0]?.profilePicKey && result?.key != userProfile[0]?.profilePicKey) {
+                    await remove({ key: userProfile[0]?.profilePicKey });
+                }
+    
+                const menteeDetails = {
+                    id: userProfile[0].id,
+                    firstName: data.menteeFirstName,
+                    lastName: data.menteeLastName,
+                    gender: data.menteeGender.value,
+                    age: data.menteeAge,
+                    ethnicity: menteeEthnicityArr,
+                    languages: menteeLanguageArr,
+                    profilePicKey: result?.key,
+                };
+            
+                const updateMentee = await client.graphql({
+                    query: mutations.updateMenteeProfile,
+                    variables: { input: menteeDetails }
+                });
+    
+                // Retrieve the file's signed URL:
+                const updatedMentee = updateMentee?.data?.updateMenteeProfile;
+                const signedURL = await getUrl({ key: updatedMentee.profilePicKey });
+                setProfileImgUrl(signedURL.url.toString());
+            } catch (error) {
+                console.log("Error updating profile", error);
+            }
+        },
+        onSuccess:  () => {
+            navigate("/personalInfo2", {replace: true});
+        },
+        onMutate: () => {
+            setLoading(true);
+        }
+    })
 
-    // // Queries existing record
-    // // async function queryData() {
 
-    // // }
-
-    // // Creates new record
-    // async function createRecord(data) {
-    //     try {
-    //         const menteeDetails = {
-    //             firstName: data.menteeFirstName,
-    //             lastName: data.menteeLastName,
-    //             gender: data.menteeGender,
-    //             age: data.menteeAge,
-    //             ethnicity: data.menteeEthnicity,
-    //             location: data.menteeLocation,
-    //         };
-        
-    //         const newMentee = await client.graphql({
-    //             query: mutations.createMenteeProfile,
-    //             variables: { input: menteeDetails }
-    //         });
-
-    //         console.log(newMentee);
-    //     } catch (error) {
-    //         console.log("Error creaing profile", error);
-    //     }
-    // }
-
-    // async function currentAuthenticatedUser() {
-    //     try {
-    //         const { username, userId, signInDetails } = await getCurrentUser();
-    //         setUsername(username);
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // }
-
+    // Handles changing image on upload
     const uploadedImage = React.useRef(null);
     const imageUploader = React.useRef(null);
   
@@ -116,12 +262,72 @@ const ProfileSetup1 = () => {
       }
     };
 
+    // Formats the multiple select questions to settable default values
+    function formatEthnicity() {
+        var ethnicityArrayLen = userProfile[0].ethnicity.length;
+        let ethnicityArrayFormatted = [];
+
+        for (var i = 0; i < ethnicityArrayLen; ++i) {
+            ethnicityArrayFormatted.push(ethnicityOptions.find(op => {
+                return op.value === userProfile[0].ethnicity[i]
+            }));
+        }
+
+        return ethnicityArrayFormatted;
+    }
+
+    // Same as above
+    function formatLanguage() {
+        var languageArrayLen = userProfile[0].languages.length;
+        let languageArrayFormatted = [];
+
+        for (var i = 0; i < languageArrayLen; ++i) {
+            languageArrayFormatted.push(languageOptions.find(op => {
+                return op.value === userProfile[0].languages[i]
+            }));
+        }   
+
+        return languageArrayFormatted;
+    }
+
+    // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
+    useEffect(() => {
+        if (isSuccess && !state && userProfile[0].length > 0) {
+            const resetMenteeGender = genderOptions.find(op => {
+                return op.value === userProfile[0].gender
+            })
+
+            console.log("test");
+
+            reset({
+                menteeFirstName: userProfile[0].firstName,
+                menteeLastName: userProfile[0].lastName,
+                menteeGender: resetMenteeGender,
+                menteeAge: userProfile[0].menteeAge,
+                menteeEthnicity: formatEthnicity().map(ele => ele),
+                menteeLanguage: formatLanguage().map(ele => ele),
+            })
+        }
+    }, [])
+
+
+    // Sets customer styles of drop down menu
+    const customStyles = {
+        control: (provided, state) => ({
+            ...provided,
+            minHeight: 42,
+            borderColor: '#E9ECEF',
+            boxShadow: state.isFocused ? '0 0 0px 4px #C2DAFF' : 'none',
+        })
+    };
+
+    // Survey questions
     const genderOptions = [
-        { value: 'woman', label: 'Woman'},
-        { value: 'man', label: 'Man'},
-        { value: 'transgender', label: 'Transgender'},
-        { value: 'non-Binary/non-conforming', label: 'Non-Binary/Non-conforming'},
-        { value: 'prefer not to respond', label: 'Prefer not to respond' }
+        { value: 'Woman', label: 'Woman'},
+        { value: 'Man', label: 'Man'},
+        { value: 'Tansgender', label: 'Transgender'},
+        { value: 'Non-Binary/Non-conforming', label: 'Non-Binary/Non-conforming'},
+        { value: 'Prefer not to respond', label: 'Prefer not to respond' }
     ]
 
     const ethnicityOptions = [
@@ -188,83 +394,80 @@ const ProfileSetup1 = () => {
         { value: 'Farsi', label: 'Farsi' },
     ]
 
-    const customStyles = {
-        control: (provided, state) => ({
-            ...provided,
-            minHeight: 42,
-            borderColor: '#E9ECEF',
-            boxShadow: state.isFocused ? '0 0 0px 4px #C2DAFF' : 'none',
-        })
-    };
-
     return (
-        <div class="d-flex flex-column min-vh-100 justify-content-center">
-            <nav class="navbar fixed-top bg-white navbar-expand-lg">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">
-                        <img class="align-middle" src={LOGO} alt=""/>
+        <div className="d-flex flex-column min-vh-100 justify-content-center">
+            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="/">
+                        <img className="align-middle" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
 
             <form onSubmit={handleSubmit(saveData)}>
-                <div class="container h-100">
-                    <div class="row">
-                        <div class="col">
-                            <div class="progress" role="progressbar" >
-                                <div class="progress-bar" style={{width: "14%", backgroundColor: "#7DC478"}}></div>
+                {isSuccess && !isLoading && (
+                <div className="container h-100">
+                    <div className="row">
+                        <div className="col">
+                            <div className="progress" role="progressbar" >
+                                <div className="progress-bar" style={{width: "14%", backgroundColor: "#7DC478"}}></div>
                             </div>
                         </div>
                     </div>
-                    <div class="row gx-5 mt-5">
-                        <div class="col">
-                            <h1 class="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
+                    <div className="row gx-5 mt-5">
+                        <div className="col">
+                            <h1 className="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
                         </div>
-                        <div class="col">
-                            <button type="submit" class="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">Next</button>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Next")}
+                            </button>
                         </div>
                        
-                        <p1 class="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us get to know you better.</p1>
+                        <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B] ">Help us get to know you better.</p>
                     </div>
-                    <div class="row gx-5 gy-5 align-items-center mt-2">
-                        <div class="col">
-                            <div class="row">
-                                <label for="menteeFirstNameInput" class="form-label tw-font-dmsans">My name is
-                                    <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                    <div className="row gx-5 gy-5 align-items-center mt-2">
+                        <div className="col">
+                            <div className="row">
+                                <label htmlFor="menteeFirstNameInput" className="form-label tw-font-dmsans">My name is
+                                    <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                 </label>
-                                <div class="col">
+                                <div className="col">
                                     <input 
                                         {...register("menteeFirstName", { required: "First name is required" })}
-                                        type="name" class="form-control tw-font-dmsans py-2" id="menteeFirstNameEmail" placeholder="First Name" defaultValue="test"
+                                        type="name" className="form-control tw-font-dmsans py-2" id="menteeFirstNameEmail" placeholder="First Name" defaultValue={(userProfile.length > 0) ? userProfile[0].firstName : ""}
                                     />
                                     <ErrorMessage 
                                         errors={errors}
                                         name="menteeFirstName"
-                                        render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                        render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                     />
                                 </div>
-                                <div class="col">
+                                <div className="col">
                                     <input 
                                         {...register("menteeLastName", { required: "Last name is required" })}
-                                        type="name" class="form-control tw-font-dmsans py-2" id="menteeLastNameInput" placeholder="Last Name" 
+                                        type="name" className="form-control tw-font-dmsans py-2" id="menteeLastNameInput" placeholder="Last Name" defaultValue={(userProfile.length > 0) ? userProfile[0].lastName : ""} 
                                     />
                                     <ErrorMessage 
                                         errors={errors}
                                         name="menteeLastName"
-                                        render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                        render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                     />
                                 </div>
                             </div>
+                            
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeGenderInput" class="form-label tw-font-dmsans">My gender is
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeGenderInput" className="form-label tw-font-dmsans">My gender is
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             name="menteeGender"
+                                            defaultValue={(userProfile.length > 0) ? genderOptions.find(op => {return op.value === userProfile[0].gender}) : null}
                                             rules={{
                                                 required: "Answer required",
                                             }}
@@ -281,7 +484,7 @@ const ProfileSetup1 = () => {
                                                     })} 
                                                     styles={customStyles} 
                                                     options={genderOptions}
-                                                    onChange={onChange}
+                                                    onChange={onChange} 
                                                     onBlur={onBlur}
                                                     value={value}
                                                     name={name}
@@ -293,15 +496,15 @@ const ProfileSetup1 = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeGender"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
-                                <div class="col">
-                                    <label for="menteeAgeInput" class="form-label tw-font-dmsans">My age is
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                                <div className="col">
+                                    <label htmlFor="menteeAgeInput" className="form-label tw-font-dmsans">My age is
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="">
+                                    <div className="">
                                         <input
                                             {...register("menteeAge", { 
                                                 required: "Age is required",
@@ -314,7 +517,7 @@ const ProfileSetup1 = () => {
                                                     message: "Must be at least 16 years old"
                                                 },
                                             })}
-                                            type="name" class="form-control tw-font-dmsans py-2" id="menteeAgeInput" placeholder="Age"
+                                            type="name" className="form-control tw-font-dmsans py-2" id="menteeAgeInput" placeholder="Age" defaultValue={(userProfile.length > 0) ? userProfile[0].age : ""}
                                         />
 
                                         <ErrorMessage 
@@ -323,7 +526,7 @@ const ProfileSetup1 = () => {
                                             render={({ messages }) => 
                                                 messages &&
                                                 Object.entries(messages).map(([type, message]) => (
-                                                    <p key={type} class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
+                                                    <p key={type} className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
                                                 ))
                                             }
                                         />
@@ -331,17 +534,18 @@ const ProfileSetup1 = () => {
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeEthnicityInput" class="form-label tw-font-dmsans">My ethnicity is
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeEthnicityInput" className="form-label tw-font-dmsans">My ethnicity is
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             rules={{
                                                 required: "Answer Required",
                                             }}
+                                            defaultValue={(userProfile.length > 0) ? formatEthnicity().map(ele => ele) : null}
                                             name="menteeEthnicity"
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
@@ -369,21 +573,22 @@ const ProfileSetup1 = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeEthnicity"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeLanguage" class="form-label tw-font-dmsans">I can speak
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeLanguage" className="form-label tw-font-dmsans">I can speak
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             name="menteeLanguage"
+                                            defaultValue={(userProfile.length > 0) ? formatLanguage().map(ele => ele) : null}
                                             rules={{
                                                 required: "Answer required",
                                             }}
@@ -413,59 +618,35 @@ const ProfileSetup1 = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeLanguage"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <hr class="hr" /> 
-                                </div>
-                            </div>
-
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeLocationInput" class="form-label tw-font-dmsans">I currently live in
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
-                                    </label>
-                                    <div class="">
-                                        <input 
-                                            {...register("menteeLocation", { 
-                                                required: "Location is required" ,
-                                                pattern: {
-                                                    value: /^[a-zA-Z ]*$/,
-                                                    message: "Please enter a valid location",
-                                                 },
-                                            })}
-                                            type="location" class="form-control tw-font-dmsans py-2" id="menteeLocationInput" placeholder="Enter city or country" 
-                                        />
-
-                                        <ErrorMessage 
-                                            errors={errors}
-                                            name="menteeLocation"
-                                            render={({ messages }) => 
-                                                messages &&
-                                                Object.entries(messages).map(([type, message]) => (
-                                                    <p key={type} class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>
-                                                ))
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+ 
                         </div>
-                        <div class="col offset-md-1">
-                            {/* <img class="tw-float-right img-fluid" src={FILLER} alt=""></img> */}
-                            <label for="menteeProfilePic" class="form-label tw-font-dmsans">Upload profile picture
-                                    <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
-                                </label>
-                            <div id="menteeProfilePic" name="menteeProfilePic" class="border border-light tw-w-96 tw-h-96 d-flex justify-content-center align-items-center">
+                        <div className="col offset-md-1">
+                            {/* <img className="tw-float-right img-fluid" src={FILLER} alt=""></img> */}
+                            <label htmlFor="menteeProfilePic" className="form-label tw-font-dmsans">Upload profile picture
+                                <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                            </label>
+                            <div id="menteeProfilePic" name="menteeProfilePic" className="border border-light tw-w-96 tw-h-96 d-flex justify-content-center align-items-center">
                                     <Controller
                                         control={control}
+                                        {...register("menteeProfilePicture", {
+                                            validate: {
+                                                required: value => {
+                                                    if (!value && profileImgUrl == '') {
+                                                        return "Profile picture is required";
+                                                    }
+                                                    return true
+                                                },
+                                            },
+                                        })}
+                                        ref={null}
                                         name={"menteeProfilePicture"}
-                                        rules={{ required: "Profile picture is required" }}
+                                        // rules={{ required: "Profile picture is required" }}
                                         render={({ field: { value, onChange, ...field } }) => {
                                         return (
                                             <input
@@ -481,20 +662,22 @@ const ProfileSetup1 = () => {
                                                 style={{
                                                     display: "none"
                                                 }}
-                                                class="w-100 h-100"
+                                                className="w-100 h-100"
                                             />
                                         );
                                         }}
                                     />
+                                    
 
-                                <div onClick={() => imageUploader.current.click()} class="border border-primary-subtle border-4 w-75 h-75 rounded-circle d-flex justify-content-center align-items-center">
+                                <div onClick={() => imageUploader.current.click()} className="border border-primary-subtle border-4 w-75 h-75 rounded-circle d-flex justify-content-center align-items-center">
                                     <img 
                                         style={{
                                             objectFit: "cover",
                                         }}
+                                        src={profileImgUrl}
                                         ref={uploadedImage}
-                                        alt="Click me"
-                                        class="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
+                                        alt={(userProfile.length > 0) ? "Loading..." : "Click Me"}
+                                        className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
                                     />
                                 </div>
                             </div>
@@ -502,11 +685,12 @@ const ProfileSetup1 = () => {
                             <ErrorMessage 
                                 errors={errors}
                                 name="menteeProfilePicture"
-                                render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                             />            
                         </div>
                     </div>
                 </div>
+                )}
             </form>
         </div>
     )

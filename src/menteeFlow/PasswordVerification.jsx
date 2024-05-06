@@ -29,39 +29,40 @@ const PasswordVerification = () => {
 
             const signInOutput = await autoSignIn();
 
-            console.log(isSignUpComplete);
-            console.log(nextStep);
-            console.log(signInOutput);
-
             sessionStorage.clear();
             navigate('/personalInfo', { replace: true });
         } catch (error) {
             let errorStr = error + '';
-            errorStr = error.substr(error.indexOf(" ") + 1);
+            errorStr = errorStr.substring(errorStr.indexOf(" ") + 1);
 
-            setError('Error confirming sign up: ' + errorStr);
-            console.log('error confirming sign up', error);
+            if (errorStr.includes("autoSignIn")) {
+                navigate('/', { replace: true });
+            } else {     
+                setError('Error confirming sign up: ' + errorStr);
+                console.log('error confirming sign up', error);
+            }
+
         }
     }
 
     return (
-        <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center">
-            <nav class="navbar fixed-top bg-white navbar-expand-lg">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">
-                        <img class="align-middle" src={LOGO} alt=""/>
+        <div className="d-flex flex-column min-vh-100 justify-content-center align-items-center">
+            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="/">
+                        <img className="align-middle" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
 
-            <div class="container h-100">
-                <div class="row gx-5 gy-5 align-items-center">
-                    <div class="col">
-                        <div class="row tw-text-center">
-                            <h1 class="tw-font-oceanwide">Verify your email address</h1>
-                            <p1 class="tw-font-dmsans">We emailed you a six-digit code to {username}. Enter the code below to confirm your email address.</p1>
+            <div className="container h-100">
+                <div className="row gx-5 gy-5 align-items-center">
+                    <div className="col">
+                        <div className="row tw-text-center">
+                            <h1 className="tw-font-oceanwide">Verify your email address</h1>
+                            <p className="tw-font-dmsans">We emailed you a six-digit code to {username}. Enter the code below to confirm your email address.</p>
                         </div>
-                        <div class="row tw-font-dmsans" style={{marginTop: '100px'}}>
+                        <div className="row tw-font-dmsans" style={{marginTop: '100px'}}>
                             <VerificationInput 
                                 validChars='0-9'
                                 inputProps={{ inputMode: "numeric" }}
@@ -76,11 +77,11 @@ const PasswordVerification = () => {
                                 onComplete={value => handleSignUpConfirmation(username, value)}
                                 
                             />
-                            <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{error}</small></p>
+                            <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{error}</small></p>
                         </div>
                     </div>
-                    <div class="col-6 offset-md-1 d-flex align-items-center justify-content-center">
-                        <img class="img-fluid" src={IMG} alt=""></img>
+                    <div className="col-6 offset-md-1 d-flex align-items-center justify-content-center">
+                        <img className="img-fluid" src={IMG} alt=""></img>
                     </div>
                 </div>
             </div>

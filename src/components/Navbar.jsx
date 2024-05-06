@@ -39,7 +39,7 @@ const Navbar = () => {
                         <button style={{fontSize: "120%", }} class="tw-font-semibold tw-text-white tw-font-dmsans mx-3 my-2 tw-border-[#5685C9] tw-border-3 tw-px-3 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] tw-rounded-xl tw-py-2 tw-border-solid hover:tw-bg-white tw-duration-300" type="button">Find a Mentor</button>
                     </div>
                 </div>
-        </div>
+            </div>
         </nav>
     )
 }

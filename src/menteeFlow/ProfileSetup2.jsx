@@ -1,31 +1,167 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { Controller, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message"
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../state';
 import Select from 'react-select'
 
 import LOGO from '../assets/logo.png'
 
-const ProfileSetup2 = () => {
-    // useEffect(() => {
-    //     if (Object.keys(state).length === 0) {
-    //         navigate("/")
-    //     }
-    // })
+import { getCurrentUser } from 'aws-amplify/auth';
+import { generateClient } from 'aws-amplify/api';
+import * as mutations from '../graphql/mutations';
+import { listMenteeProfiles } from '../graphql/queries';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { getUrl } from 'aws-amplify/storage';
+import { Oval } from 'react-loader-spinner';
 
-    const [state, setState] = useAppState();
-    const { handleSubmit, 
-            register,
-            control,
-            formState: { errors },
-        } = useForm({ defaultValues: state, criteriaMode: "all" });
+const client = generateClient();
+
+const ProfileSetup2 = () => {
+    // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
+    const [username, setUsername] = useState('');
     const navigate = useNavigate();
 
+    // Profile picture url
+    const [profileImgUrl, setProfileImgUrl] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const [state, setAppState] = useAppState();
+
+    // Fetches the username of the current authenticated user
+    async function currentAuthenticatedUser() {
+        try {
+            const { username } = await getCurrentUser();
+            setUsername(username);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    // On every refresh, fetch the username of the current authenticated user
+    useEffect(() => {
+        currentAuthenticatedUser();
+    }, [username]);
+
+
+    // Fetches the current user based off the username given above
+    const {
+        data: userProfile,
+        isLoading,
+        isSuccess,
+    } = useQuery({
+        queryKey: ["userProfile"],
+        queryFn: async () => {
+            const variables = {
+                filter: {
+                    owner: {
+                        contains: username
+                    }
+                }
+            };
+
+            const response = await client.graphql({
+                query: listMenteeProfiles,
+                variables: variables
+            });
+
+            let completeProfile = response?.data?.listMenteeProfiles?.items;
+
+            if (!completeProfile) return null;
+
+            if(completeProfile[0]?.profilePicKey) {
+                // Format image url
+                const signedURL = await getUrl({ key: completeProfile[0].profilePicKey });
+                setProfileImgUrl(signedURL.url.toString());
+            } else {
+                setProfileImgUrl("");
+            }
+        
+            return completeProfile;
+        }
+    })
+
+    // ****************************************************************
+
+    // Handles the submission of the form
+    const { handleSubmit, 
+        register,
+        control,
+        formState: { errors },
+        reset
+    } = useForm({defaultValues: state, criteriaMode: "all" });
+
     const saveData = (data) => {
-        setState({...state, ...data });
-        navigate("/education")
+        // set state
+        setAppState({...state, ...data });
+
+        // If record exists, update, else, create a new one
+        updateRecord.mutate(data);
     };
+
+     // Updates existing record
+     const updateRecord = useMutation({
+        mutationFn: async (data) => {
+            try {
+                // Simplify the formatting of the user's ethnicity input
+                let valueArr = [];
+                var valueArrLen = data.menteeValues.length;
+                for (var i = 0; i < valueArrLen; i++) {
+                    valueArr.push(data.menteeValues[i].value);
+                }
+    
+                const menteeDetails = {
+                    id: userProfile[0].id,
+                    values: valueArr,
+                    instagram: data.menteeInstagram,
+                    facebook: data.menteeFacebook,
+                    linkedin: data.LinkedIn,
+                };
+            
+                const updateMentee = await client.graphql({
+                    query: mutations.updateMenteeProfile,
+                    variables: { input: menteeDetails }
+                });
+            } catch (error) {
+                console.log("Error updating profile", error);
+            }
+        },
+        onSuccess:  () => {
+            navigate("/education", {replace: true});
+        },
+        onMutate: () => {
+            setLoading(true);
+        }
+    })
+
+    // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
+    useEffect(() => {
+        if (isSuccess && !state && userProfile[0].length > 0) {
+            reset({
+                menteeValues: formatValues().map(ele => ele),
+                menteeInstagram: userProfile[0].instagram,
+                menteeFacebook: userProfile[0].facebook,
+                menteeLinkedIn: userProfile[0].linkedin,
+            })
+        }
+    }, [])
+
+    // Formats the multiple select questions to settable default values
+    function formatValues() {
+        let valueArrFormatted = [];
+        if (userProfile[0].values) {
+            var valueArrLen = userProfile[0].values.length;
+
+            for (var i = 0; i < valueArrLen; ++i) {
+                valueArrFormatted.push(valueOptions.find(op => {
+                    return op.value === userProfile[0].values[i]
+                }));
+            }
+        }
+
+        return valueArrFormatted;
+    }
+    
 
     const customStyles = {
         control: (provided, state) => ({
@@ -96,71 +232,74 @@ const ProfileSetup2 = () => {
         { value: 'Wisdom', label: 'Wisdom' },
     ]
 
-    const personalityOptions = [
-        { value: 'ISTJ', label: 'ISTJ - Introverted, Sensing, Thinking, Judging' },
-        { value: 'ISFJ', label: 'ISFJ - Introverted, Sensing, Feeling, Judging' },
-        { value: 'INFJ', label: 'INFJ - Introverted, Intuitive, Feeling, Judging' },
-        { value: 'INTJ', label: 'INTJ - Introverted, Intuitive, Thinking, Judging' },
-        { value: 'ISTP', label: 'ISTP - Introverted, Sensing, Thinking, Perceiving' },
-        { value: 'ISFP', label: 'ISFP - Introverted, Sensing, Feeling, Perceiving' },
-        { value: 'INFP', label: 'INFP - Introverted, Intuitive, Feeling, Perceiving' },
-        { value: 'INTP', label: 'INTP - Introverted, Intuitive, Thinking, Perceiving' },
-        { value: 'ESTP', label: 'ESTP - Extraverted, Sensing, Thinking, Perceiving' },
-        { value: 'ESFP', label: 'ESFP - Extraverted, Sensing, Feeling, Perceiving' },
-        { value: 'ENFP', label: 'ENFP - Extraverted, Intuitive, Feeling, Perceiving' },
-        { value: 'ENTP', label: 'ENTP - Extraverted, Intuitive, Thinking, Perceiving' },
-        { value: 'ESTJ', label: 'ESTJ - Extraverted, Sensing, Thinking, Judging' },
-        { value: 'ESFJ', label: 'ESFJ - Extraverted, Sensing, Feeling, Judging' },
-        { value: 'ENFJ', label: 'ENFJ - Extraverted, Intuitive, Feeling, Judging' },
-        { value: 'ENTJ', label: 'ENTJ - Extraverted, Intuitive, Thinking, Judging' },
-    ]
+    // const personalityOptions = [
+    //     { value: 'ISTJ', label: 'ISTJ - Introverted, Sensing, Thinking, Judging' },
+    //     { value: 'ISFJ', label: 'ISFJ - Introverted, Sensing, Feeling, Judging' },
+    //     { value: 'INFJ', label: 'INFJ - Introverted, Intuitive, Feeling, Judging' },
+    //     { value: 'INTJ', label: 'INTJ - Introverted, Intuitive, Thinking, Judging' },
+    //     { value: 'ISTP', label: 'ISTP - Introverted, Sensing, Thinking, Perceiving' },
+    //     { value: 'ISFP', label: 'ISFP - Introverted, Sensing, Feeling, Perceiving' },
+    //     { value: 'INFP', label: 'INFP - Introverted, Intuitive, Feeling, Perceiving' },
+    //     { value: 'INTP', label: 'INTP - Introverted, Intuitive, Thinking, Perceiving' },
+    //     { value: 'ESTP', label: 'ESTP - Extraverted, Sensing, Thinking, Perceiving' },
+    //     { value: 'ESFP', label: 'ESFP - Extraverted, Sensing, Feeling, Perceiving' },
+    //     { value: 'ENFP', label: 'ENFP - Extraverted, Intuitive, Feeling, Perceiving' },
+    //     { value: 'ENTP', label: 'ENTP - Extraverted, Intuitive, Thinking, Perceiving' },
+    //     { value: 'ESTJ', label: 'ESTJ - Extraverted, Sensing, Thinking, Judging' },
+    //     { value: 'ESFJ', label: 'ESFJ - Extraverted, Sensing, Feeling, Judging' },
+    //     { value: 'ENFJ', label: 'ENFJ - Extraverted, Intuitive, Feeling, Judging' },
+    //     { value: 'ENTJ', label: 'ENTJ - Extraverted, Intuitive, Thinking, Judging' },
+    // ]
 
 
     return (
-        <div class="d-flex flex-column min-vh-100 justify-content-center">
-            <nav class="navbar fixed-top bg-white navbar-expand-lg">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">
-                        <img class="align-middle" src={LOGO} alt=""/>
+        <div className="d-flex flex-column min-vh-100 justify-content-center">
+            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <div className="container-fluid">
+                    <a className="navbar-brand" href="/">
+                        <img className="align-middle" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
 
             <form onSubmit={handleSubmit(saveData)}>
-                <div class="container h-100">
-                    <div class="row">
-                        <div class="col">
-                            <div class="progress" role="progressbar" >
-                                <div class="progress-bar" style={{width: "28%", backgroundColor: "#7DC478"}}></div>
+            {isSuccess && !isLoading && (
+                <div className="container h-100">
+                    <div className="row">
+                        <div className="col">
+                            <div className="progress" role="progressbar" >
+                                <div className="progress-bar" style={{width: "28%", backgroundColor: "#7DC478"}}></div>
                             </div>
                         </div>
                     </div>
-                    <div class="row gx-5 mt-5">
-                        <div class="col">
-                            <h1 class="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
+                    <div className="row gx-5 mt-5">
+                        <div className="col">
+                            <h1 className="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
                         </div>
-                        <div class="col">
-                            <button type="submit" class="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">Next</button>
-                            <Link to="/personalInfo">
-                                <button class="float-end tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">{"<"}</button>
-                            </Link>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Next")}
+                            </button>
+                            <button onClick={() => {navigate('/personalInfo', {replace: true})}}  className="float-end tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">{"<"}</button>
                         </div>
                        
-                        <p1 class="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us get to know you better.</p1>
+                        <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us get to know you better.</p>
                     </div>
-                    <div class="row gx-5 gy-5 align-items-center mt-2">
-                        <div class="col">
-                            <div class="row">
-                                <div class="col">
-                                    <label for="menteeValues" class="form-label tw-font-dmsans">I value
-                                        <p1 class="tw-font-dmans tw-text-[#DE5840]">*</p1>
+                    <div className="row gx-5 gy-5 align-items-center mt-2">
+                        <div className="col">
+                            <div className="row">
+                                <div className="col">
+                                    <label htmlFor="menteeValues" className="form-label tw-font-dmsans">I value
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
-                                    <div class="tw-font-dmsans">
+                                    <div className="tw-font-dmsans">
                                         <Controller
                                             control={control}
                                             rules={{
                                                 required: "Answer Required",
                                             }}
+                                            defaultValue={(userProfile.length > 0) ? formatValues().map(ele => ele) : null}
                                             name="menteeValues"
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
@@ -188,15 +327,15 @@ const ProfileSetup2 = () => {
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeValues"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteePersonalityType" class="form-label tw-font-dmsans">My personality type</label>
+                            {/* <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteePersonalityType" className="form-label tw-font-dmsans">My personality type</label>
                                         <Controller
                                             control={control}
                                             name="menteePersonalityType"
@@ -223,18 +362,18 @@ const ProfileSetup2 = () => {
                                         />
                             
                                 </div>
-                            </div>
+                            </div> */}
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <hr class="hr" /> 
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <hr className="hr" /> 
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeInstagram" class="form-label tw-font-dmsans">Find me on Instagram</label>
-                                    <div class="">
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeInstagram" className="form-label tw-font-dmsans">Find me on Instagram</label>
+                                    <div className="">
                                         <input 
                                             {...register("menteeInstagram", { 
                                                 pattern: {
@@ -242,22 +381,26 @@ const ProfileSetup2 = () => {
                                                     message: "Please enter a valid Instagram URL",
                                                  },
                                             })}
-                                            type="social" class="form-control tw-font-dmsans py-2" id="menteeInstagram" placeholder="https://www.instagram.com/username/" 
+                                            type="social" 
+                                            className="form-control tw-font-dmsans py-2" 
+                                            id="menteeInstagram" 
+                                            placeholder="https://www.instagram.com/username/" 
+                                            defaultValue={(userProfile.length > 0) ? userProfile[0].instagram : ""}
                                         />
 
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeInstagram"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeFacebook" class="form-label tw-font-dmsans">Find me on Facebook</label>
-                                    <div class="">
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeFacebook" className="form-label tw-font-dmsans">Find me on Facebook</label>
+                                    <div className="">
                                         <input 
                                             {...register("menteeFacebook", { 
                                                 pattern: {
@@ -265,22 +408,26 @@ const ProfileSetup2 = () => {
                                                     message: "Please enter a valid Facebook URL",
                                                  },
                                             })}
-                                            type="social" class="form-control tw-font-dmsans py-2" id="menteeFacebook" placeholder="https://www.facebook.com/username/" 
+                                            type="social" 
+                                            className="form-control tw-font-dmsans py-2" 
+                                            id="menteeFacebook" 
+                                            placeholder="https://www.facebook.com/username/" 
+                                            defaultValue={(userProfile.length > 0) ? userProfile[0].facebook : ""}
                                         />
 
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeFacebook"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <label for="menteeLinkedIn" class="form-label tw-font-dmsans">Find me on LinkedIn</label>
-                                    <div class="">
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <label htmlFor="menteeLinkedIn" className="form-label tw-font-dmsans">Find me on LinkedIn</label>
+                                    <div className="">
                                         <input 
                                             {...register("menteeLinkedIn", { 
                                                 pattern: {
@@ -288,45 +435,50 @@ const ProfileSetup2 = () => {
                                                     message: "Please enter a valid LinkedIn profile URLK",
                                                  },
                                             })}
-                                            type="location" class="form-control tw-font-dmsans py-2" id="menteeLinkedIn" placeholder="https://www.linkedin.com/in/username/" 
+                                            type="location" 
+                                            className="form-control tw-font-dmsans py-2" 
+                                            id="menteeLinkedIn" 
+                                            placeholder="https://www.linkedin.com/in/username/" 
+                                            defaultValue={(userProfile.length > 0) ? userProfile[0].linkedin : ""}
                                         />
 
                                         <ErrorMessage 
                                             errors={errors}
                                             name="menteeLinkedIn"
-                                            render={({ message }) => <p class="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
+                                            render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                         />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col offset-md-1">
-                            <div class="row">
-                                <div class="col d-flex justify-content-center align-items-center">
-                                    <div class="border border-primary-subtle border-4 tw-h-96 tw-w-96 rounded-circle">
+                        <div className="col offset-md-1">
+                            <div className="row">
+                                <div className="col d-flex justify-content-center align-items-center">
+                                    <div className="border border-primary-subtle border-4 tw-h-96 tw-w-96 rounded-circle">
                                         <img 
                                             style={{
                                                 objectFit: "cover",
                                             }}
-                                            src={URL.createObjectURL(state.menteeProfilePicture)}
-                                            onError={(e)=>{e.target.onError = null; e.target.src = LOGO}}
-                                            alt=""
-                                            class="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
+                                            src={profileImgUrl}
+                                            alt="Loading..."
+                                            className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row text-center mt-4">
-                                <div class="col">
-                                    <p1 class="tw-font-dmsans tw-font-bold">{state.menteeFirstName} {state.menteeLastName}</p1> 
+                            <div className="row text-center mt-4">
+                                <div className="col">
+                                    <p className="tw-font-dmsans tw-font-bold">{(userProfile.length > 0) ? userProfile[0].firstName : ""} {(userProfile.length > 0) ? userProfile[0].lastName : ""}</p> 
                                 </div>
                             </div>    
                         </div>
                     </div>
                 </div>
+                )}
             </form>
         </div>
+
     )
 }
 

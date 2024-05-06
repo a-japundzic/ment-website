@@ -13,6 +13,20 @@ import { Amplify } from 'aws-amplify';
 import config from './amplifyconfiguration.json';
 Amplify.configure(config);
 
+Amplify.configure(config, {
+
+  Storage: {
+
+    S3: {
+      // configures default access level
+      defaultAccessLevel: 'protected'
+
+    }
+
+  }
+
+});
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

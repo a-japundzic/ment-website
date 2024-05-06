@@ -5,12 +5,60 @@ type MenteeProfile @model @auth(rules: [{allow: owner}, {allow: private, operati
   lastName: String
   gender: String
   age: String
-  ethnicity: String
+  ethnicity: [String]
   languages: [String]
-  location: String
   values: [String]
-  personalityType: String
-  instagram: AWSURL
-  facebook: AWSURL
-  linkedin: AWSURL
+  instagram: String
+  facebook: String
+  linkedin: String
+  profilePicKey: String
+  schoolName: String
+  programOfStudy: String
+  educationLevel: String
+  graduationYear: String
+}
+
+type MentorProfile @model @auth(rules: [{allow: owner}, {allow: private, operations: [read]}]) {
+  id: ID!
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+  firstName: String
+  lastName: String
+  gender: String
+  age: String
+  ethnicity: [String]
+  languages: [String]
+  values: [String]
+  instagram: String
+  facebook: String
+  linkedin: String
+  profilePicKey: String
+  bio: String
+  experience: [String]
+  calendly: String
+}
+
+type MenteePreferences @model @auth(rules: [{allow: owner}, {allow: private, operations: [read]}]) {
+  id: ID!
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+  mentorshipSkills: [String]
+  mentorshipType: [String]
+  mentorshipFrequency: [String]
+  mentorshipGoal: [String]
+  comments: String
+  menteeId: String
+}
+
+type MentorPreferences @model @auth(rules: [{allow: owner}, {allow: private, operations: [read]}]) {
+  id: ID!
+  owner: String @auth(rules: [{ allow: owner, operations: [read, delete] }])
+  mentorshipSkills: [String]
+  mentorshipType: [String]
+  mentorshipFrequency: [String]
+  mentorshipGoal: [String]
+  comments: String
+  mentorId: String
+}
+
+type Query {
+  echo(msg: String): String @function(name: "matchfunction-${env}")
 }
