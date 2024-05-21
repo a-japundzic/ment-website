@@ -16,6 +16,7 @@ type MenteeProfile @model @auth(rules: [{allow: owner}, {allow: private, operati
   programOfStudy: String
   educationLevel: String
   graduationYear: String
+  identityId: String
 }
 
 type MentorProfile @model @auth(rules: [{allow: owner}, {allow: private, operations: [read]}]) {
@@ -35,6 +36,7 @@ type MentorProfile @model @auth(rules: [{allow: owner}, {allow: private, operati
   bio: String
   experience: [String]
   calendly: String
+  identityId: String
 }
 
 type MenteePreferences @model @auth(rules: [{allow: owner}, {allow: private, operations: [read]}]) {

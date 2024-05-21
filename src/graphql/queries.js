@@ -114,6 +114,7 @@ export const listMentorProfiles = /* GraphQL */ `
         profilePicKey
         bio
         experience
+        identityId
         calendly
         createdAt
         updatedAt
@@ -145,6 +146,7 @@ export const menteeListMentorProfiles = /* GraphQL */ `
         linkedin
         profilePicKey
         bio
+        identityId
         experience
         calendly
         createdAt

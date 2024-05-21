@@ -152,7 +152,7 @@ const SignIn = () => {
 
 
                 setLoading(false);
-                setError('Error signing up: ' + error);
+                setError('Error signing in: ' + error);
             }
         },
         onMutate: () => {

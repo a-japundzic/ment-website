@@ -204,7 +204,7 @@ const ProfileSetup1 = () => {
                     data: data.menteeProfilePicture,
                     options: {
                         contentType: 'image/png',
-                        accessLevel: 'protected',
+                        accessLevel: 'public',
                     }
                 }).result;
     

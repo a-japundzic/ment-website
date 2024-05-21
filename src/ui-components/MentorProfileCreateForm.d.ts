@@ -37,6 +37,7 @@ export declare type MentorProfileCreateFormInputValues = {
     bio?: string;
     experience?: string[];
     calendly?: string;
+    identityId?: string;
 };
 export declare type MentorProfileCreateFormValidationValues = {
     owner?: ValidationFunction<string>;
@@ -54,6 +55,7 @@ export declare type MentorProfileCreateFormValidationValues = {
     bio?: ValidationFunction<string>;
     experience?: ValidationFunction<string>;
     calendly?: ValidationFunction<string>;
+    identityId?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type MentorProfileCreateFormOverridesProps = {
@@ -73,6 +75,7 @@ export declare type MentorProfileCreateFormOverridesProps = {
     bio?: PrimitiveOverrideProps<TextFieldProps>;
     experience?: PrimitiveOverrideProps<TextFieldProps>;
     calendly?: PrimitiveOverrideProps<TextFieldProps>;
+    identityId?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type MentorProfileCreateFormProps = React.PropsWithChildren<{
     overrides?: MentorProfileCreateFormOverridesProps | undefined | null;

@@ -35,7 +35,7 @@
         },
         "test": {
           "deploymentBucketName": "amplify-mentwebsite-dev-33243-deployment",
-          "s3Key": "amplify-builds/test-44695564303648544657-build.zip"
+          "s3Key": "amplify-builds/test-476a463747747a6e3044-build.zip"
         }
       }
     }

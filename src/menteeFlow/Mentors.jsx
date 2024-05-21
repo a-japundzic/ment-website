@@ -49,6 +49,7 @@ const Mentors = () => {
   }, [username]);
 
   const [data, setData] = useState([{}]);
+  const [pictures, setPictures] = useState({});
 
     // Fetches the current user based off the username given above
   const topThree = useQuery({
@@ -107,51 +108,54 @@ const Mentors = () => {
           variables: filterIds
       });
 
+      // Retreiving top three mentors images
+      const topThreeList = topThreeMatches?.data?.listMentorProfiles?.items;
 
-      //console.log(topThreeMatches)
+      for (var i = 0; i < 3; ++i){
+        const signedURL = await getUrl({ 
+          key: topThreeList[i].profilePicKey,
+          options: {
+            accessLevel: 'protected',
+            targetIdentityId: topThreeList[i].identityId,
+            validateObjectExistence: true,
+          }
+        });
 
-      return topThreeMatches?.data?.listMentorProfiles?.items;
+        topThreeList[i]["imageURL"] = signedURL.url.toString();
+      }
+
+      return topThreeList;
     }
   })
 
-  useEffect(() => {
-    console.log(topThree.data)
-  }, [topThree])
-
-  async function formatProfilePic(profilePicKey) {
-      // Format image url
-      const signedURL = await getUrl({ 
-        path: 'protected/us-east-1:e30584f2-b029-cb3f-2fa8-b9e71a10b32a/144bfd1b-2073-482c-aaca-0910b26059b7-David_Bowie.webp',
-        data: File,
+  // Fetches the current user based off the username given above
+  const explore = useQuery({
+    queryKey: ["explore"],
+    queryFn: async () => {
+      const topThreeMatches = await client.graphql({
+          query: menteeListMentorProfiles,
       });
-      console.log(signedURL.url.toString());
-      return signedURL.url.toString();
-  }
- 
 
-  const mentors = [
-    {
-      name: "John Doe",
-      rating: 4.5,
-      position: "Senior Software Engineer",
-      availability: "Next Availability: 5 May 2022",
-      image: Mentor1,
-    },
-    {
-      name: "Jane Smith",
-      rating: 4.2,
-      position: "Product Manager",
-      availability: "Next Availability: 7 May 2022",
-      image: Mentor2,
-    },
-    {
-      name: "Mike Johnson",
-      rating: 4.8,
-      position: "UX/UI Designer",
-      availability: "Next Availability: 10 May 2022",
-      image: Mentor3,
-    },
-  ];
+      // Retreiving top three mentors images
+      const exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
+      const exploreListLen = exploreList.length;
+
+      for (var i = 0; i < exploreListLen; ++i){
+        const signedURL = await getUrl({ 
+          key: exploreList[i].profilePicKey,
+          options: {
+            accessLevel: 'protected',
+            targetIdentityId: exploreList[i].identityId,
+            validateObjectExistence: true,
+          }
+        });
+
+        exploreList[i]["imageURL"] = signedURL.url.toString();
+      }
+
+      return exploreList;
+    }
+  })
 
   return (
     <div >
@@ -173,44 +177,73 @@ const Mentors = () => {
                       <li className="nav-item">
                           <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Bookings</a>
                       </li>
-                      <li className="nav-item">
+                      {/* <li className="nav-item">
                           <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Inbox</a>
                       </li>
                       <li className="nav-item">
                           <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Community</a>
-                      </li>
+                      </li> */}
                   </ul>
               </div>
           </div>
       </nav>
 
-      <div className="container w-75 ">
+      <div className="container w-100">
         <div className="row gx-5 mt-5">
-          <h1 className="tw-font-oceanwide">
+          <h2 className="tw-font-oceanwide">
             Here are your top 3 mentor matches!
-          </h1>
+          </h2>
         </div>
 
-      {( topThree.isSuccess &&
-        <div className="row  mt-4 w-100 mx-auto">
-          {topThree.data.map((mentor, index) => (
-            <div key={index} className="col mx-4">
-              <div className="card">
-                <img src={formatProfilePic(mentor.profilePicKey)} className="card-img-top img-fluid" alt="Mentor" />
-                <div className="card-body">
-                  <h5 className="card-title mb-0 tw-font dm-sans">{mentor.firstName}</h5>
-                  <p className="card-text tw-font-dmsans fs-6 fw-light">{mentor.lastName}</p>
-                  <div className="d-flex justify-content-center">
-                  <button type="submit" className="tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-[85px] tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">
-                    Check availability
-                  </button>
+
+        {( topThree.isSuccess && !topThree.isLoading &&
+          <div className="row row-cols-3 d-flex justify-content-center mt-1 gy-3 mx-auto">
+            {topThree.data.map((mentor, index) => (
+              <div key={index} className="col col-lg-4" >
+                <div className="card w-100" >
+                  <img src={mentor.imageURL} className="card-img-top img-fluid tw-object-cover" style={{height: "22rem"}} alt="Mentor"/>
+                  <div className="card-body">
+                    <h5 className="card-title mb-0 tw-font-semibold dm-sans">{mentor.firstName} {mentor.lastName}</h5>
+                    <p className="mt-1 card-text tw-font-dmsans fs-6 fw-light">{mentor.experience[0]}</p>
+                    <div className="d-flex justify-content-center">
+                    <button type="submit" className="tw-text-lg mt-2 tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 w-100 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">
+                      Profile
+                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+
+        <div className="row gx-5 mt-5">
+          <h2 className="tw-font-oceanwide">
+            Explore Mentors
+          </h2>
         </div>
-      )}
+
+
+        {( explore.isSuccess && !explore.isLoading &&
+          <div className="row row-cols-3 d-flex mt-1 gy-3 mx-auto">
+            {explore.data.map((mentor, index) => (
+              <div key={index} className="col col-lg-4" >
+                <div className="card w-100" >
+                  <img src={mentor.imageURL} className="card-img-top img-fluid tw-object-cover" style={{height: "22rem"}} alt="Mentor"/>
+                  <div className="card-body">
+                    <h5 className="card-title mb-0 tw-font-semibold dm-sans">{mentor.firstName} {mentor.lastName}</h5>
+                    <p className="mt-1 card-text tw-font-dmsans fs-6 fw-light">{mentor.experience[0]}</p>
+                    <div className="d-flex justify-content-center">
+                    <button onClick={() => {navigate('/mentorProfile', { state: { mentor: mentor } })}} type="submit" className="tw-text-lg mt-2 tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 w-100 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">
+                      Profile
+                    </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

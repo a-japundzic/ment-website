@@ -113,7 +113,7 @@ const MenteePreferences3 = () => {
             }
         },
         onSuccess:  () => {
-            navigate("/LoadingScreen", {replace: true});
+            navigate("/menteeHome", {replace: true});
         },
         onMutate: () => {
             setLoading(true);

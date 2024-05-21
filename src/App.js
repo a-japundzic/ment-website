@@ -28,6 +28,7 @@ import { AppProvider } from "./state";
 //  TanStack Query
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import MentorProfile from "./menteeFlow/MentorProfile";
 
 
 
@@ -62,6 +63,7 @@ function App() {
               <Route path="/mentorPreferences2" element={<MentorPreferences2/>} />
               <Route path="/mentorLoadingScreen" element={<MentorLoadingScreen/>} />
               <Route path="/menteeHome" element={<Mentors />} />
+              <Route path="/mentorProfile" element={<MentorProfile />} />
             </Routes>
           </Router>
         </AppProvider>
