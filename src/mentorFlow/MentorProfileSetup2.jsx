@@ -115,7 +115,7 @@ const MentorProfileSetup2 = () => {
                     values: valueArr,
                     instagram: data.mentorInstagram,
                     facebook: data.mentorFacebook,
-                    linkedin: data.LinkedIn,
+                    linkedin: data.mentorLinkedIn,
                 };
             
                 const updateMentor = await client.graphql({

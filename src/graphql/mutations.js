@@ -59,6 +59,17 @@ export const updateMenteeProfile = /* GraphQL */ `
     }
   }
 `;
+export const updateMenteeMeetingList = /* GraphQL */ `
+  mutation UpdateMenteeProfile(
+    $input: UpdateMenteeProfileInput!
+    $condition: ModelMenteeProfileConditionInput
+  ) {
+    updateMenteeProfile(input: $input, condition: $condition) {
+      id
+      meetingList
+    }
+  }
+`;
 export const deleteMenteeProfile = /* GraphQL */ `
   mutation DeleteMenteeProfile(
     $input: DeleteMenteeProfileInput!
@@ -141,6 +152,17 @@ export const updateMentorProfile = /* GraphQL */ `
       createdAt
       updatedAt
       __typename
+    }
+  }
+`;
+export const updateMentorMeetingList = /* GraphQL */ `
+  mutation UpdateMentorProfile(
+    $input: UpdateMentorProfileInput!
+    $condition: ModelMentorProfileConditionInput
+  ) {
+    updateMentorProfile(input: $input, condition: $condition) {
+      id
+      meetingList
     }
   }
 `;

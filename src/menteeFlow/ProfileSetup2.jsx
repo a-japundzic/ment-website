@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message"
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../state';
@@ -17,7 +17,7 @@ import { Oval } from 'react-loader-spinner';
 
 const client = generateClient();
 
-const ProfileSetup2 = () => {
+const ProfileSetup2 = ({ settings=false }) => {
     // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
     const [username, setUsername] = useState('');
     const navigate = useNavigate();
@@ -115,10 +115,10 @@ const ProfileSetup2 = () => {
                     values: valueArr,
                     instagram: data.menteeInstagram,
                     facebook: data.menteeFacebook,
-                    linkedin: data.LinkedIn,
+                    linkedin: data.menteeLinkedIn,
                 };
             
-                const updateMentee = await client.graphql({
+                await client.graphql({
                     query: mutations.updateMenteeProfile,
                     variables: { input: menteeDetails }
                 });
@@ -127,7 +127,10 @@ const ProfileSetup2 = () => {
             }
         },
         onSuccess:  () => {
-            navigate("/education", {replace: true});
+            setLoading(false);
+            if (!settings) {
+                navigate("/education", {replace: true});
+            }
         },
         onMutate: () => {
             setLoading(true);
@@ -253,7 +256,8 @@ const ProfileSetup2 = () => {
 
 
     return (
-        <div className="d-flex flex-column min-vh-100 justify-content-center">
+        <div className={ settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
+            {( !settings && 
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
@@ -261,10 +265,12 @@ const ProfileSetup2 = () => {
                     </a>
                 </div>
             </nav>
+            )}
 
             <form onSubmit={handleSubmit(saveData)}>
             {isSuccess && !isLoading && (
                 <div className="container h-100">
+                    {( !settings &&
                     <div className="row">
                         <div className="col">
                             <div className="progress" role="progressbar" >
@@ -272,6 +278,9 @@ const ProfileSetup2 = () => {
                             </div>
                         </div>
                     </div>
+                    )}
+
+                    {( !settings && 
                     <div className="row gx-5 mt-5">
                         <div className="col">
                             <h1 className="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
@@ -286,6 +295,24 @@ const ProfileSetup2 = () => {
                        
                         <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us get to know you better.</p>
                     </div>
+                    )}
+
+                    {( settings &&
+                    <div className="row gx-5 mt-5">
+                        <div className='col'>
+                            <p className="tw-font-dmsans">
+                                Make your required changes and then press the "submit changes" button.
+                            </p>
+                        </div>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Submit Changes")}
+                            </button>
+                        </div>
+                    </div>
+                    )}
+
                     <div className="row gx-5 gy-5 align-items-center mt-2">
                         <div className="col">
                             <div className="row">
@@ -432,14 +459,14 @@ const ProfileSetup2 = () => {
                                             {...register("menteeLinkedIn", { 
                                                 pattern: {
                                                     value: /^https:\/\/www.linkedin.com\/in\/*/,
-                                                    message: "Please enter a valid LinkedIn profile URLK",
+                                                    message: "Please enter a valid LinkedIn profile URL",
                                                  },
                                             })}
                                             type="location" 
                                             className="form-control tw-font-dmsans py-2" 
                                             id="menteeLinkedIn" 
                                             placeholder="https://www.linkedin.com/in/username/" 
-                                            defaultValue={(userProfile.length > 0) ? userProfile[0].linkedin : ""}
+                                            defaultValue={(userProfile[0]?.linkedin) ? userProfile[0].linkedin : ""}
                                         />
 
                                         <ErrorMessage 

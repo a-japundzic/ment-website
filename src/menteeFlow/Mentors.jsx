@@ -1,9 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Mentor1 from "../assets/Mentor1.png";
-import Mentor2 from "../assets/Mentor2.png";
-import Mentor3 from "../assets/Mentor3.png";
-import LOGO from '../assets/logo.png'
-import Hamburger from 'hamburger-react'
 
 import '../css/hamburger.css'
 import { useNavigate } from 'react-router-dom'
@@ -15,19 +10,16 @@ import { getCurrentUser, signUp } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
 import { getUrl } from "aws-amplify/storage";
 
+import { Oval } from 'react-loader-spinner';
+import NavBar from "../combinedFlow/NavBar";
+
 const client = generateClient();
 
 const Mentors = () => {
   const navigate = useNavigate();
-  const [isOpen, setOpen] = useState(false);
-
   const saveData = (data) => {
     // This navigates you to the next page when the next button is clicked
     navigate("/Top");
-  };
-
-  const handleClick = () => {
-    setOpen(!isOpen);
   };
 
   // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
@@ -129,64 +121,37 @@ const Mentors = () => {
   })
 
   // Fetches the current user based off the username given above
-  const explore = useQuery({
-    queryKey: ["explore"],
-    queryFn: async () => {
-      const topThreeMatches = await client.graphql({
-          query: menteeListMentorProfiles,
-      });
+  // const explore = useQuery({
+  //   queryKey: ["explore"],
+  //   queryFn: async () => {
+  //     const topThreeMatches = await client.graphql({
+  //         query: menteeListMentorProfiles,
+  //     });
 
-      // Retreiving top three mentors images
-      const exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
-      const exploreListLen = exploreList.length;
+  //     // Retreiving top three mentors images
+  //     const exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
+  //     const exploreListLen = exploreList.length;
 
-      for (var i = 0; i < exploreListLen; ++i){
-        const signedURL = await getUrl({ 
-          key: exploreList[i].profilePicKey,
-          options: {
-            accessLevel: 'protected',
-            targetIdentityId: exploreList[i].identityId,
-            validateObjectExistence: true,
-          }
-        });
+  //     for (var i = 0; i < exploreListLen; ++i){
+  //       const signedURL = await getUrl({ 
+  //         key: exploreList[i].profilePicKey,
+  //         options: {
+  //           accessLevel: 'protected',
+  //           targetIdentityId: exploreList[i].identityId,
+  //           validateObjectExistence: true,
+  //         }
+  //       });
 
-        exploreList[i]["imageURL"] = signedURL.url.toString();
-      }
+  //       exploreList[i]["imageURL"] = signedURL.url.toString();
+  //     }
 
-      return exploreList;
-    }
-  })
+  //     return exploreList;
+  //   }
+  // })
 
   return (
     <div >
-        <nav className="navbar bg-white navbar-expand-lg">
-          <div className="container-fluid">
-              <a className="navbar-brand" href="/">
-                  <img className="align-middle" src={LOGO} alt=""/>
-              </a>
-              <button className="navbar-toggler justify-content-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-                  <span onClick={handleClick} className="">
-                      <Hamburger toggled={isOpen} size={30} duration={0.5} color={"#5685C9"} rounded toggle={setOpen} />
-                  </span>
-              </button>
-              <div className="collapse navbar-collapse text-end justify-content-end" id="navbarTogglerDemo02">
-                  <ul className="navbar-nav">
-                      <li className="nav-item active hover:tw-text-blue">
-                          <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" aria-current="page" href="/menteeHome">Home</a>
-                      </li>
-                      <li className="nav-item">
-                          <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Bookings</a>
-                      </li>
-                      {/* <li className="nav-item">
-                          <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Inbox</a>
-                      </li>
-                      <li className="nav-item">
-                          <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Community</a>
-                      </li> */}
-                  </ul>
-              </div>
-          </div>
-      </nav>
+      <NavBar focused={"home"} />
 
       <div className="container w-100">
         <div className="row gx-5 mt-5">
@@ -194,6 +159,12 @@ const Mentors = () => {
             Here are your top 3 mentor matches!
           </h2>
         </div>
+
+        {( topThree.isLoading &&
+          <div className="d-flex justify-content-center mt-5">
+            <Oval className="tw-duration-300" visible={true} color="#5685C9" secondaryColor='#5685C9' width="35" height="35" strokeWidth={4} strokeWidthSecondary={4} />
+          </div>
+        )}
 
 
         {( topThree.isSuccess && !topThree.isLoading &&
@@ -206,7 +177,7 @@ const Mentors = () => {
                     <h5 className="card-title mb-0 tw-font-semibold dm-sans">{mentor.firstName} {mentor.lastName}</h5>
                     <p className="mt-1 card-text tw-font-dmsans fs-6 fw-light">{mentor.experience[0]}</p>
                     <div className="d-flex justify-content-center">
-                    <button type="submit" className="tw-text-lg mt-2 tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 w-100 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">
+                    <button onClick={() => {navigate('/mentorProfile', { state: { mentor: mentor } })}} type="submit" className="tw-text-lg mt-2 tw-font-bold tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 w-100 tw-font hover:tw-text-white tw-bg-white rounded tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300">
                       Profile
                     </button>
                     </div>
@@ -222,6 +193,12 @@ const Mentors = () => {
             Explore Mentors
           </h2>
         </div>
+
+        {/* {( explore.isLoading &&
+          <div className="d-flex justify-content-center mt-5">
+            <Oval className="tw-duration-300" visible={true} color="#5685C9" secondaryColor='#5685C9' width="35" height="35" strokeWidth={4} strokeWidthSecondary={4} />
+          </div>
+        )}
 
 
         {( explore.isSuccess && !explore.isLoading &&
@@ -243,7 +220,7 @@ const Mentors = () => {
               </div>
             ))}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

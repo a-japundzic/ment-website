@@ -1,4 +1,5 @@
 import SignIn from "./combinedFlow/SignIn";
+import Settings from "./combinedFlow/Settings";
 
 import MenteeSignUp from "./menteeFlow/MenteeSignUp";
 import PasswordVerification from "./menteeFlow/PasswordVerification";
@@ -45,12 +46,12 @@ function App() {
               <Route path="/" element={<SignIn/>} />
               <Route path="/menteeSignUp" element={<MenteeSignUp/>} />
               <Route path="/passwordVerification" element={<PasswordVerification/>} />
-              <Route path="/personalInfo" element={<ProfileSetup1/>} />
-              <Route path="/personalInfo2" element={<ProfileSetup2/>} />
-              <Route path="/education" element={<Education/>} />
-              <Route path="/menteePreferences" element={<MenteePreferences/>} />
-              <Route path="/menteePreferences2" element={<MenteePreferences2/>} />
-              <Route path="/menteePreferences3" element={<MenteePreferences3/>} />
+              <Route path="/personalInfo" element={<ProfileSetup1 settings={false} />} />
+              <Route path="/personalInfo2" element={<ProfileSetup2 settings={false}/>} />
+              <Route path="/education" element={<Education settings={false}/>} />
+              <Route path="/menteePreferences" element={<MenteePreferences settings={false}/>} />
+              <Route path="/menteePreferences2" element={<MenteePreferences2 settings={false}/>} />
+              <Route path="/menteePreferences3" element={<MenteePreferences3 settings={false}/>} />
               <Route path="/loadingScreen" element={<LoadingScreen/>} />
               <Route path="/mentorSignUp" element={<MentorSignUp/>} />
               <Route path="/mentorPasswordVerification" element={<MentorPasswordVerification/>} />
@@ -64,6 +65,7 @@ function App() {
               <Route path="/mentorLoadingScreen" element={<MentorLoadingScreen/>} />
               <Route path="/menteeHome" element={<Mentors />} />
               <Route path="/mentorProfile" element={<MentorProfile />} />
+              <Route path="/profileSettings" element={<Settings />} />
             </Routes>
           </Router>
         </AppProvider>

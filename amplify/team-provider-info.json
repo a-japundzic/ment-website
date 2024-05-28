@@ -31,11 +31,11 @@
       "function": {
         "matchfunction": {
           "deploymentBucketName": "amplify-mentwebsite-dev-33243-deployment",
-          "s3Key": "amplify-builds/matchfunction-717a4a34743835674d70-build.zip"
+          "s3Key": "amplify-builds/matchfunction-6f5942526c646c737250-build.zip"
         },
         "test": {
           "deploymentBucketName": "amplify-mentwebsite-dev-33243-deployment",
-          "s3Key": "amplify-builds/test-476a463747747a6e3044-build.zip"
+          "s3Key": "amplify-builds/test-6a4139616f71576a374b-build.zip"
         }
       }
     }

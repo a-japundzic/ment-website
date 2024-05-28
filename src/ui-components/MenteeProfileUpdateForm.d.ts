@@ -39,6 +39,7 @@ export declare type MenteeProfileUpdateFormInputValues = {
     educationLevel?: string;
     graduationYear?: string;
     identityId?: string;
+    meetingList?: string[];
 };
 export declare type MenteeProfileUpdateFormValidationValues = {
     owner?: ValidationFunction<string>;
@@ -58,6 +59,7 @@ export declare type MenteeProfileUpdateFormValidationValues = {
     educationLevel?: ValidationFunction<string>;
     graduationYear?: ValidationFunction<string>;
     identityId?: ValidationFunction<string>;
+    meetingList?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type MenteeProfileUpdateFormOverridesProps = {
@@ -79,6 +81,7 @@ export declare type MenteeProfileUpdateFormOverridesProps = {
     educationLevel?: PrimitiveOverrideProps<TextFieldProps>;
     graduationYear?: PrimitiveOverrideProps<TextFieldProps>;
     identityId?: PrimitiveOverrideProps<TextFieldProps>;
+    meetingList?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type MenteeProfileUpdateFormProps = React.PropsWithChildren<{
     overrides?: MenteeProfileUpdateFormOverridesProps | undefined | null;

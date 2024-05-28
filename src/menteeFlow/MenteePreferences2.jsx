@@ -18,7 +18,7 @@ import '../css/checkbox.css'
 
 const client = generateClient();
 
-const MenteePreferences2 = () => {
+const MenteePreferences2 = ({ settings=false }) => {
     // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
     const [username, setUsername] = useState('');
     const navigate = useNavigate();
@@ -109,11 +109,14 @@ const MenteePreferences2 = () => {
     
                 // console.log(updateMenteePreferences);
             } catch (error) {
-                console.log("Error updating profile", error);
+                console.log("Error updating profile ", error);
             }
         },
         onSuccess:  () => {
-            navigate("/menteePreferences3", {replace: true});
+            setLoading(false);
+            if (!settings) {
+                navigate("/menteePreferences3", {replace: true});
+            }
         },
         onMutate: () => {
             setLoading(true);
@@ -129,7 +132,9 @@ const MenteePreferences2 = () => {
     }
 
     return (
-        <div className="d-flex flex-column min-vh-100 justify-content-center">
+        <div className={ settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
+
+            {( !settings && 
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
@@ -137,10 +142,12 @@ const MenteePreferences2 = () => {
                     </a>
                 </div>
             </nav>
+            )}
 
             <form onSubmit={handleSubmit(saveData)}>
                 {isSuccess && !isLoading && (
                 <div className="container h-100">
+                    {( !settings &&
                     <div className="row">
                         <div className="col">
                             <div className="progress" role="progressbar" >
@@ -148,6 +155,9 @@ const MenteePreferences2 = () => {
                             </div>
                         </div>
                     </div>
+                    )}
+
+                    {( !settings && 
                     <div className="row gx-5 mt-5">
                         <div className="col">
                             <h1 className="tw-font-oceanwide">Your mentorship preferences.</h1>
@@ -162,11 +172,32 @@ const MenteePreferences2 = () => {
                        
                         <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us pair you with the ideal mentor.</p>
                     </div>
+                    )}
+
+                    {( settings &&
+                    <div className="row gx-5 mt-5">
+                        <div className='col'>
+                            <p className="tw-font-dmsans">
+                                Make your required changes and then press the "submit changes" button.
+                            </p>
+                        </div>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Submit Changes")}
+                            </button>
+                        </div>
+                    </div>
+                    )}
+
                     <div className="row gx-5 gy-5 mt-1 align-items-center">
                         <div className="col">
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeTypeInput" className="form-label tw-font-dmsans">What mentorship are you looking for?</label>
+                                    <label htmlFor="menteeTypeInput" className="form-label tw-font-dmsans">
+                                        What mentorship are you looking for?
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                                    </label>
                                     <ul className="list-group mt-1" id="menteeTypeInput">
                                         <label className="list-group-item tw-font-dmsans">
                                             <input 
@@ -201,7 +232,10 @@ const MenteePreferences2 = () => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeFrequency" className="form-label tw-font-dmsans">How frequently do you want to meet your mentor?</label>
+                                    <label htmlFor="menteeFrequency" className="form-label tw-font-dmsans">
+                                        How frequently do you want to meet your mentor?
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                                    </label>
                                     <ul className="list-group mt-1" id="menteeFrequency">
                                         <label className="list-group-item tw-font-dmsans">
                                             <input 

@@ -208,6 +208,7 @@ export default function MenteeProfileUpdateForm(props) {
     educationLevel: "",
     graduationYear: "",
     identityId: "",
+    meetingList: [],
   };
   const [owner, setOwner] = React.useState(initialValues.owner);
   const [firstName, setFirstName] = React.useState(initialValues.firstName);
@@ -234,6 +235,9 @@ export default function MenteeProfileUpdateForm(props) {
     initialValues.graduationYear
   );
   const [identityId, setIdentityId] = React.useState(initialValues.identityId);
+  const [meetingList, setMeetingList] = React.useState(
+    initialValues.meetingList
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = menteeProfileRecord
@@ -259,6 +263,8 @@ export default function MenteeProfileUpdateForm(props) {
     setEducationLevel(cleanValues.educationLevel);
     setGraduationYear(cleanValues.graduationYear);
     setIdentityId(cleanValues.identityId);
+    setMeetingList(cleanValues.meetingList ?? []);
+    setCurrentMeetingListValue("");
     setErrors({});
   };
   const [menteeProfileRecord, setMenteeProfileRecord] = React.useState(
@@ -285,6 +291,9 @@ export default function MenteeProfileUpdateForm(props) {
   const languagesRef = React.createRef();
   const [currentValuesValue, setCurrentValuesValue] = React.useState("");
   const valuesRef = React.createRef();
+  const [currentMeetingListValue, setCurrentMeetingListValue] =
+    React.useState("");
+  const meetingListRef = React.createRef();
   const validations = {
     owner: [],
     firstName: [],
@@ -303,6 +312,7 @@ export default function MenteeProfileUpdateForm(props) {
     educationLevel: [],
     graduationYear: [],
     identityId: [],
+    meetingList: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -347,6 +357,7 @@ export default function MenteeProfileUpdateForm(props) {
           educationLevel: educationLevel ?? null,
           graduationYear: graduationYear ?? null,
           identityId: identityId ?? null,
+          meetingList: meetingList ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -424,6 +435,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -464,6 +476,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.firstName ?? value;
@@ -504,6 +517,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.lastName ?? value;
@@ -544,6 +558,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.gender ?? value;
@@ -584,6 +599,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.age ?? value;
@@ -620,6 +636,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             values = result?.ethnicity ?? values;
@@ -681,6 +698,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             values = result?.languages ?? values;
@@ -742,6 +760,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             values = result?.values ?? values;
@@ -807,6 +826,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.instagram ?? value;
@@ -847,6 +867,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.facebook ?? value;
@@ -887,6 +908,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.linkedin ?? value;
@@ -927,6 +949,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.profilePicKey ?? value;
@@ -967,6 +990,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.schoolName ?? value;
@@ -1007,6 +1031,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.programOfStudy ?? value;
@@ -1047,6 +1072,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel: value,
               graduationYear,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.educationLevel ?? value;
@@ -1087,6 +1113,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear: value,
               identityId,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.graduationYear ?? value;
@@ -1127,6 +1154,7 @@ export default function MenteeProfileUpdateForm(props) {
               educationLevel,
               graduationYear,
               identityId: value,
+              meetingList,
             };
             const result = onChange(modelFields);
             value = result?.identityId ?? value;
@@ -1141,6 +1169,70 @@ export default function MenteeProfileUpdateForm(props) {
         hasError={errors.identityId?.hasError}
         {...getOverrideProps(overrides, "identityId")}
       ></TextField>
+      <ArrayField
+        onChange={async (items) => {
+          let values = items;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              firstName,
+              lastName,
+              gender,
+              age,
+              ethnicity,
+              languages,
+              values,
+              instagram,
+              facebook,
+              linkedin,
+              profilePicKey,
+              schoolName,
+              programOfStudy,
+              educationLevel,
+              graduationYear,
+              identityId,
+              meetingList: values,
+            };
+            const result = onChange(modelFields);
+            values = result?.meetingList ?? values;
+          }
+          setMeetingList(values);
+          setCurrentMeetingListValue("");
+        }}
+        currentFieldValue={currentMeetingListValue}
+        label={"Meeting list"}
+        items={meetingList}
+        hasError={errors?.meetingList?.hasError}
+        runValidationTasks={async () =>
+          await runValidationTasks("meetingList", currentMeetingListValue)
+        }
+        errorMessage={errors?.meetingList?.errorMessage}
+        setFieldValue={setCurrentMeetingListValue}
+        inputFieldRef={meetingListRef}
+        defaultFieldValue={""}
+      >
+        <TextField
+          label="Meeting list"
+          isRequired={false}
+          isReadOnly={false}
+          value={currentMeetingListValue}
+          onChange={(e) => {
+            let { value } = e.target;
+            if (errors.meetingList?.hasError) {
+              runValidationTasks("meetingList", value);
+            }
+            setCurrentMeetingListValue(value);
+          }}
+          onBlur={() =>
+            runValidationTasks("meetingList", currentMeetingListValue)
+          }
+          errorMessage={errors.meetingList?.errorMessage}
+          hasError={errors.meetingList?.hasError}
+          ref={meetingListRef}
+          labelHidden={true}
+          {...getOverrideProps(overrides, "meetingList")}
+        ></TextField>
+      </ArrayField>
       <Flex
         justifyContent="space-between"
         {...getOverrideProps(overrides, "CTAFlex")}

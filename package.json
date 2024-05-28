@@ -25,6 +25,7 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.8.0",
     "react-verification-input": "^4.1.2",
+    "reactjs-popup": "^2.0.6",
     "web-vitals": "^2.1.0"
   },
   "scripts": {

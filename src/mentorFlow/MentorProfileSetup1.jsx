@@ -198,39 +198,56 @@ const MentorProfileSetup1 = () => {
                 }
     
                 // Upload the profile pic file:
-                const result = await uploadData({
-                    key: `${userProfile[0].id}-${data.mentorProfilePicture.name}`,
-                    data: data.mentorProfilePicture,
-                    options: {
-                        contentType: 'image/png',
-                        accessLevel: 'protected',
+                if (data?.mentorProfilePicture) {
+                    const result = await uploadData({
+                        key: `${userProfile[0].id}-${data.mentorProfilePicture.name}`,
+                        data: data.mentorProfilePicture,
+                        options: {
+                            contentType: 'image/png',
+                            accessLevel: 'protected',
+                        }
+                    }).result;
+        
+                    if (userProfile[0]?.profilePicKey && result?.key != userProfile[0]?.profilePicKey) {
+                        await remove({ key: userProfile[0]?.profilePicKey });
                     }
-                }).result;
-    
-                if (userProfile[0]?.profilePicKey && result?.key != userProfile[0]?.profilePicKey) {
-                    await remove({ key: userProfile[0]?.profilePicKey });
+        
+                    const mentorDetails = {
+                        id: userProfile[0].id,
+                        firstName: data.mentorFirstName,
+                        lastName: data.mentorLastName,
+                        gender: data.mentorGender.value,
+                        age: data.mentorAge,
+                        ethnicity: mentorEthnicityArr,
+                        languages: mentorLanguageArr,
+                        profilePicKey: result?.key,
+                    };
+                
+                    const updateMentor = await client.graphql({
+                        query: mutations.updateMentorProfile,
+                        variables: { input: mentorDetails }
+                    });
+        
+                    // Retrieve the file's signed URL:
+                    const updatedMentor = updateMentor?.data?.updateMentorProfile;
+                    const signedURL = await getUrl({ key: updatedMentor.profilePicKey });
+                    setProfileImgUrl(signedURL.url.toString());
+                } else {
+                    const mentorDetails = {
+                        id: userProfile[0].id,
+                        firstName: data.mentorFirstName,
+                        lastName: data.mentorLastName,
+                        gender: data.mentorGender.value,
+                        age: data.mentorAge,
+                        ethnicity: mentorEthnicityArr,
+                        languages: mentorLanguageArr,
+                    };
+                
+                    await client.graphql({
+                        query: mutations.updateMentorProfile,
+                        variables: { input: mentorDetails }
+                    });
                 }
-    
-                const mentorDetails = {
-                    id: userProfile[0].id,
-                    firstName: data.mentorFirstName,
-                    lastName: data.mentorLastName,
-                    gender: data.mentorGender.value,
-                    age: data.mentorAge,
-                    ethnicity: mentorEthnicityArr,
-                    languages: mentorLanguageArr,
-                    profilePicKey: result?.key,
-                };
-            
-                const updateMentor = await client.graphql({
-                    query: mutations.updateMentorProfile,
-                    variables: { input: mentorDetails }
-                });
-    
-                // Retrieve the file's signed URL:
-                const updatedMentor = updateMentor?.data?.updateMentorProfile;
-                const signedURL = await getUrl({ key: updatedMentor.profilePicKey });
-                setProfileImgUrl(signedURL.url.toString());
             } catch (error) {
                 console.log("Error updating profile", error);
             }

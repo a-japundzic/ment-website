@@ -3,23 +3,30 @@ import LOGO from "../assets/logo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Hamburger from "hamburger-react";
 import Mentor1 from "../assets/Mentor1.png";
-import { InlineWidget } from "react-calendly";
+import { useCalendlyEventListener, InlineWidget } from "react-calendly";
 
 import Instagram from "../assets/instagram.png"
 import Facebook from "../assets/facebook.png"
 import LinkedIn from "../assets/linkedin.png"
+import NavBar from "../combinedFlow/NavBar";
+import * as mutations from '../graphql/mutations';
+import { useMutation } from "@tanstack/react-query";
+import { getCurrentUser } from "aws-amplify/auth";
+import { listMenteeMeetingList } from "../graphql/queries";
+import { generateClient } from "aws-amplify/api";
+import Popup from "reactjs-popup";
+import "../css/popup.css"
 
-const MentorProfile = () => {
+const client = generateClient();
+
+const MentorProfile = ({ settings }) => {
   // const [state, setAppState] = useAppState();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [isOpen, setOpen] = useState(false);
-  const [selectedMentor, setSelectedMentor] = useState(null);
-
-  const saveData = (data) => {
-    // setAppState({ ...state, ...data });
-    // This navigates you to the next page when the next button is clicked
-    navigate("/Top");
-  };
+  const [showPopup, setShowPopup] = useState(false);
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const closeModal = () => setShowPopup(false);
+  const closeConfirm = () => setShowConfirmPopup(false);
 
   const handleClick = () => {
     setOpen(!isOpen);
@@ -31,58 +38,124 @@ const MentorProfile = () => {
     console.log(state);
   }, [state]);
 
-  const mentor = {
-    name: "John Doe",
-    rating: 4.5,
-    position: "Senior Software Engineer",
-    availability: "Next Availability: 5 May 2022",
-    image: Mentor1,
-  };
+  const updateMeetingList = useMutation({
+    mutationFn: async () => {
+      try {
+        // Get mentee username
+        const { username } = await getCurrentUser();
+        const variables = {
+          filter: {
+            owner: {
+              contains: username
+            }
+          }
+        };
+
+        // Get the mentees current meeting list and id
+        const response = await client.graphql({
+          query: listMenteeMeetingList,
+          variables: variables
+        });
+
+        console.log(response);
+        let menteeMeetingList = response?.data?.listMenteeProfiles?.items[0]?.meetingList;
+        const menteeId = response?.data?.listMenteeProfiles?.items[0]?.id;
+        console.log(menteeId);
+
+        // Initialize list if necessary
+        if (!menteeMeetingList) {
+          menteeMeetingList = [];
+        } 
+          
+        // Add new meeting to list
+        if (!menteeMeetingList.includes(state?.mentor?.id)) {
+          menteeMeetingList.push(state?.mentor?.id);
+
+          // Update the meeting list
+          const menteeDetails = {
+            id: menteeId,
+            meetingList: menteeMeetingList
+          }
+
+          const updatedMenteeList = await client.graphql({
+            query: mutations.updateMenteeMeetingList,
+            variables: { input: menteeDetails },
+          });
+          // 
+
+          // Get the mentor meeting list
+          let mentorMeetingList = state?.mentor?.meetingList;
+
+          // Initialize if necessary
+          if (!mentorMeetingList) {
+            mentorMeetingList = []
+          }
+
+          mentorMeetingList.push(menteeId);
+
+          // Upadte the meeting list
+          const mentorDetails = {
+            id: state?.mentor?.id,
+            meetingList: mentorMeetingList,
+          }
+
+          const updatedMentorList = await client.graphql({
+            query: mutations.updateMentorMeetingList,
+            variables: { input: mentorDetails },
+          })
+
+          showConfirmPopup(true);
+          // 
+
+          // Print to error check (comment out as required)
+          // console.log(updatedMentorList);
+
+
+          // For debugging purposes
+          // console.log(updatedMenteeList);
+        } else {
+          setShowPopup(true);
+        }
+      } catch (error) {
+        console.log("Error updating meeting list ", error)
+      }
+    }
+  })
+
+  useCalendlyEventListener({
+    onEventScheduled: (e) => updateMeetingList.mutate(),
+  });
 
   return (
     <div>
-      <nav className="navbar bg-white navbar-expand-lg">
-        <div className="container-fluid">
-            <a className="navbar-brand" href="/">
-                <img className="align-middle" src={LOGO} alt=""/>
-            </a>
-            <button className="navbar-toggler justify-content-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-                <span onClick={handleClick} className="">
-                    <Hamburger toggled={isOpen} size={30} duration={0.5} color={"#5685C9"} rounded toggle={setOpen} />
-                </span>
-            </button>
-            <div className="collapse navbar-collapse text-end justify-content-end" id="navbarTogglerDemo02">
-                <ul className="navbar-nav align-items-center">
-                    <li className="nav-item hover:tw-text-blue">
-                        <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/menteeHome">Home</a>
-                    </li>
-                    <li className="nav-item">
-                        <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Bookings</a>
-                    </li>
-                    {/* <li className="nav-item">
-                        <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Inbox</a>
-                    </li>
-                    <li className="nav-item">
-                        <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Community</a>
-                    </li> */}
-                    <li className="nav-item">
-                      <a  className="nav-link mx-3" href="/">
-                        <div className=" tw-w-16 tw-h-16 rounded-circle">
-                          <img 
-                              style={{
-                                  objectFit: "cover",
-                              }}
-                              src={state.mentor.imageURL}
-                              alt="Loading..."
-                              className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
-                          />
-                        </div>
-                      </a>
-                    </li>
-                </ul>
-            </div>
+      {/* Popup in case a meeting is double booked */}
+      <Popup open={showPopup} modal closeOnDocumentClick onClose={closeModal}>
+        <h2 className="tw-font-oceanwide tw-text-center mt-1">Heads Up!</h2>
+        <p className="tw-font-dmsans tw-text-center ">
+          You have already booked a meeting with this mentor. <br />
+          Please avoid double booking mentors as they are
+          extremely busy. If this wasn't planned, please cancel the meeting
+          using the confirmation email you were sent. Thank you!
+        </p> 
+        <div className="d-flex justify-content-center">
+          <button className="mt-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-1 tw-px-3 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300" onClick={closeModal}>I understand</button>
         </div>
-      </nav>
+      </Popup>
+
+      {/* Popup in case a meeting booking is successful */}
+      <Popup open={showConfirmPopup} modal closeOnDocumentClick onClose={closeConfirm}>
+        <h2 className="tw-font-oceanwide tw-text-center mt-1">Next Steps</h2>
+        <p className="tw-font-dmsans tw-text-center ">
+          Your meeting has been booked with <b>{state.mentor.firstName}</b>.
+          For a meeting link and next steps check your email. If you don't
+          see the email, check your junk/spam folder.
+        </p> 
+        <div className="d-flex justify-content-center">
+          <button className="mt-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-1 tw-px-3 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300" onClick={closeConfirm}>Close</button>
+        </div>
+      </Popup>
+
+      <NavBar focused={"profile"} />
 
       <div className="container mt-5 w-100">
         <h1 className="tw-font-oceanwide mb-4">Mentor Profile</h1>
@@ -145,7 +218,7 @@ const MentorProfile = () => {
           <div className="row mt-4">
             <div className="col-lg-4">
               <h5 className="tw-font-oceanwide">Experience</h5>
-              <ul className="list-group list-group-horizontal-md tw-font-dmsans">
+              <ul className="list-group  tw-font-dmsans">
                 {state.mentor.experience.map((job) => {
                   if (job != "") {
                     return <li className="list-group-item">{job}</li>
@@ -165,6 +238,8 @@ const MentorProfile = () => {
               </ul>
             </div>
           </div>
+
+          <div className="row mt-4"></div>
         </div>
       </div>
     </div>

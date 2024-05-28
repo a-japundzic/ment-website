@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { getCurrentUser, signIn } from 'aws-amplify/auth';
 import { signOut } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
-import { listMenteeProfiles, listMentorProfiles } from '../graphql/queries';
+import { listMenteePreferences, listMenteeProfiles, listMentorProfiles } from '../graphql/queries';
 
 import { fetchUserAttributes } from 'aws-amplify/auth';
 
@@ -84,8 +84,8 @@ const SignIn = () => {
                     variables: variables
                 });
 
-                let userProfile = response?.data?.listMenteeProfiles?.items;
-                let userProfileLen = userProfile.length;
+                const userProfile = response?.data?.listMenteeProfiles?.items;
+                const userProfileLen = userProfile.length;
 
                 if (userProfileLen == 0) {
                     navigate("/personalInfo", { replace: true });
@@ -93,8 +93,23 @@ const SignIn = () => {
                     navigate("/personalInfo2", { replace: true });
                 } else if (!userProfile[0].schoolName) {
                     navigate("education", { replace: true });
-                } else {
+                }
+                
+                const preferenceResponse = await client.graphql({
+                    query: listMenteePreferences,
+                    variables: variables
+                });
+
+                const userPreferences = preferenceResponse?.data?.listMenteePreferences?.items;
+                
+                if (!userPreferences[0].mentorshipSkills) {
                     navigate("/menteePreferences", { replace: true });
+                } else if (!userPreferences[0].mentorshipType) {
+                    navigate("/menteePreferences2", { replace: true });
+                } else if (!userPreferences[0].mentorshipGoal) {
+                    navigate("/menteePreferences3", { replace: true });
+                } else {
+                    navigate("/menteeHome", { replace: true });
                 }
             } else if (userAttributes["custom:user_type"] === "Mentor") {
                 const variables = {

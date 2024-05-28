@@ -66,6 +66,22 @@ export const listMenteeProfiles = /* GraphQL */ `
     }
   }
 `;
+export const listMenteeMeetingList = /* GraphQL */ `
+  query ListMenteeProfiles(
+    $filter: ModelMenteeProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listMenteeProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        meetingList
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const getMentorProfile = /* GraphQL */ `
   query GetMentorProfile($id: ID!) {
     getMentorProfile(id: $id) {
@@ -88,6 +104,14 @@ export const getMentorProfile = /* GraphQL */ `
       createdAt
       updatedAt
       __typename
+    }
+  }
+`;
+export const getMentorMeetingList = /* GraphQL */ `
+  query GetMentorProfile($id: ID!) {
+    getMentorProfile(id: $id) {
+      id
+      meetingList
     }
   }
 `;
@@ -116,6 +140,7 @@ export const listMentorProfiles = /* GraphQL */ `
         experience
         identityId
         calendly
+        meetingList
         createdAt
         updatedAt
         __typename
