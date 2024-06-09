@@ -23,6 +23,8 @@ export const createMenteeProfile = /* GraphQL */ `
       schoolName
       programOfStudy
       educationLevel
+      learningGoals
+      identityId
       graduationYear
       createdAt
       updatedAt
@@ -50,7 +52,9 @@ export const updateMenteeProfile = /* GraphQL */ `
       linkedin
       profilePicKey
       schoolName
+      learningGoals
       programOfStudy
+      identityId
       educationLevel
       graduationYear
       createdAt
@@ -91,6 +95,8 @@ export const deleteMenteeProfile = /* GraphQL */ `
       profilePicKey
       schoolName
       programOfStudy
+      identityId
+      learningGoals
       educationLevel
       graduationYear
       createdAt
@@ -117,6 +123,7 @@ export const createMentorProfile = /* GraphQL */ `
       instagram
       facebook
       linkedin
+      identityId
       profilePicKey
       bio
       experience
@@ -145,6 +152,7 @@ export const updateMentorProfile = /* GraphQL */ `
       instagram
       facebook
       linkedin
+      identityId
       profilePicKey
       bio
       experience
@@ -183,6 +191,7 @@ export const deleteMentorProfile = /* GraphQL */ `
       values
       instagram
       facebook
+      identityId
       linkedin
       profilePicKey
       bio
@@ -206,7 +215,7 @@ export const createMenteePreferences = /* GraphQL */ `
       mentorshipType
       mentorshipFrequency
       mentorshipGoal
-      comments
+      learningGoals
       menteeId
       createdAt
       updatedAt
@@ -226,7 +235,7 @@ export const updateMenteePreferences = /* GraphQL */ `
       mentorshipType
       mentorshipFrequency
       mentorshipGoal
-      comments
+      learningGoals
       menteeId
       createdAt
       updatedAt
@@ -246,7 +255,7 @@ export const deleteMenteePreferences = /* GraphQL */ `
       mentorshipType
       mentorshipFrequency
       mentorshipGoal
-      comments
+      learningGoals
       menteeId
       createdAt
       updatedAt

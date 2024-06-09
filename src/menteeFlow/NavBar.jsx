@@ -93,7 +93,7 @@ const NavBar = ({ focused }) => {
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" aria-current="page" href="/menteeHome">Home</a>
                         </li>
                         <li className="nav-item">
-                            <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Bookings</a>
+                            <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/menteeBookings">Bookings</a>
                         </li>
                         <li className="nav-item">
                         <a  className="nav-link mx-3" href="/profileSettings">
@@ -117,7 +117,7 @@ const NavBar = ({ focused }) => {
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3"  href="/menteeHome">Home</a>
                         </li>
                         <li className="nav-item active hover:tw-text-blue">
-                            <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" aria-current="page" href="/">Bookings</a>
+                            <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" aria-current="page" href="/menteeBookings">Bookings</a>
                         </li>
                         <li className="nav-item">
                         <a  className="nav-link mx-3" href="/profileSettings">
@@ -141,7 +141,7 @@ const NavBar = ({ focused }) => {
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3"  href="/menteeHome">Home</a>
                         </li>
                         <li className="nav-item">
-                            <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/">Bookings</a>
+                            <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/menteeBookings">Bookings</a>
                         </li>
                         <li className="nav-item">
                         <a  className="nav-link mx-3" href="/profileSettings">

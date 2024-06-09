@@ -7,7 +7,7 @@ import Select from 'react-select'
 
 import LOGO from '../assets/logo.png'
 
-import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import * as mutations from '../graphql/mutations';
 import { listMentorProfiles } from '../graphql/queries';
@@ -17,7 +17,7 @@ import { Oval } from 'react-loader-spinner';
 
 const client = generateClient();
 
-const MentorProfileSetup1 = () => {
+const MentorProfileSetup1 = ({ settings=false }) => {
     // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
     const [username, setUsername] = useState('');
     const navigate = useNavigate();
@@ -89,7 +89,7 @@ const MentorProfileSetup1 = () => {
             register,
             control,
             formState: { errors },
-            reset
+            // reset
         } = useForm({defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -122,9 +122,11 @@ const MentorProfileSetup1 = () => {
                 // Simplify the formatting of the user's lenguage input
                 let mentorLanguageArr = [];
                 var languageArrayLen = data.mentorLanguage.length;
-                for (var i = 0; i < languageArrayLen; i++) {
-                    mentorLanguageArr.push(data.mentorLanguage[i].value);
+                for (var y = 0; y < languageArrayLen; y++) {
+                    mentorLanguageArr.push(data.mentorLanguage[y].value);
                 }
+
+                const cred = await fetchAuthSession();
     
                 const mentorDetails = {
                     firstName: data.mentorFirstName,
@@ -133,6 +135,7 @@ const MentorProfileSetup1 = () => {
                     age: data.mentorAge,
                     ethnicity: mentorEthnicityArr,
                     languages: mentorLanguageArr,
+                    identityId: cred?.identityId,
                 };
             
                 const newMentor = await client.graphql({
@@ -171,7 +174,11 @@ const MentorProfileSetup1 = () => {
             }
         },
         onSuccess:  () => {
-            navigate("/mentorPersonalInfo2", {replace: true});
+            setLoading(false);
+
+            if (!settings) {
+                navigate("/mentorPersonalInfo2", {replace: true});
+            }
         },
         onMutate: () => {
             setLoading(true);
@@ -193,8 +200,8 @@ const MentorProfileSetup1 = () => {
                 // Simplify the formatting of the user's lenguage input
                 let mentorLanguageArr = [];
                 var languageArrayLen = data.mentorLanguage.length;
-                for (var i = 0; i < languageArrayLen; i++) {
-                    mentorLanguageArr.push(data.mentorLanguage[i].value);
+                for (var z = 0; z < languageArrayLen; z++) {
+                    mentorLanguageArr.push(data.mentorLanguage[z].value);
                 }
     
                 // Upload the profile pic file:
@@ -208,7 +215,7 @@ const MentorProfileSetup1 = () => {
                         }
                     }).result;
         
-                    if (userProfile[0]?.profilePicKey && result?.key != userProfile[0]?.profilePicKey) {
+                    if (userProfile[0]?.profilePicKey && result?.key !== userProfile[0]?.profilePicKey) {
                         await remove({ key: userProfile[0]?.profilePicKey });
                     }
         
@@ -253,7 +260,11 @@ const MentorProfileSetup1 = () => {
             }
         },
         onSuccess:  () => {
-            navigate("/mentorPersonalInfo2", {replace: true});
+            setLoading(false);
+
+            if (!settings) {
+                navigate("/mentorPersonalInfo2", {replace: true});
+            }
         },
         onMutate: () => {
             setLoading(true);
@@ -380,23 +391,23 @@ const MentorProfileSetup1 = () => {
     }
 
     // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    useEffect(() => {
-        if (isSuccess && !state && userProfile[0].length > 0) {
-            console.log("test");
-            const resetMentorGender = genderOptions.find(op => {
-                return op.value === userProfile[0].gender
-            })
+    // useEffect(() => {
+    //     if (isSuccess && !state && userProfile[0].length > 0) {
+    //         console.log("test");
+    //         const resetMentorGender = genderOptions.find(op => {
+    //             return op.value === userProfile[0].gender
+    //         })
 
-            reset({
-                mentorFirstName: userProfile[0].firstName,
-                mentorLastName: userProfile[0].lastName,
-                mentorGender: resetMentorGender,
-                mentorAge: userProfile[0].mentorAge,
-                mentorEthnicity: formatEthnicity().map(ele => ele),
-                mentorLanguage: formatLanguage().map(ele => ele),
-            })
-        }
-    }, [])
+    //         reset({
+    //             mentorFirstName: userProfile[0].firstName,
+    //             mentorLastName: userProfile[0].lastName,
+    //             mentorGender: resetMentorGender,
+    //             mentorAge: userProfile[0].mentorAge,
+    //             mentorEthnicity: formatEthnicity().map(ele => ele),
+    //             mentorLanguage: formatLanguage().map(ele => ele),
+    //         })
+    //     }
+    // }, [])
 
 
     // Sets customer styles of drop down menu
@@ -410,7 +421,8 @@ const MentorProfileSetup1 = () => {
     };
 
     return (
-        <div className="d-flex flex-column min-vh-100 justify-content-center">
+        <div className={settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
+            {( !settings &&
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
@@ -418,10 +430,13 @@ const MentorProfileSetup1 = () => {
                     </a>
                 </div>
             </nav>
+            )}
 
             <form onSubmit={handleSubmit(saveData)}>
                 {isSuccess && !isLoading && (
                 <div className="container h-100">
+
+                    {( !settings && 
                     <div className="row">
                         <div className="col">
                             <div className="progress" role="progressbar" >
@@ -429,6 +444,9 @@ const MentorProfileSetup1 = () => {
                             </div>
                         </div>
                     </div>
+                    )}
+
+                    {( !settings &&
                     <div className="row gx-5 mt-5">
                         <div className="col">
                             <h1 className="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
@@ -442,6 +460,25 @@ const MentorProfileSetup1 = () => {
                        
                         <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B] ">Help us get to know you better.</p>
                     </div>
+                    )}
+
+                    
+                    {( settings &&
+                    <div className="row gx-5 mt-5">
+                        <div className='col'>
+                            <p className="tw-font-dmsans">
+                                Make your required changes and then press the "submit changes" button.
+                            </p>
+                        </div>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Submit Changes")}
+                            </button>
+                        </div>
+                    </div>
+                    )}
+
                     <div className="row gx-5 gy-5 align-items-center mt-2">
                         <div className="col">
                             <div className="row">
@@ -652,7 +689,7 @@ const MentorProfileSetup1 = () => {
                                         {...register("mentorProfilePicture", {
                                             validate: {
                                                 required: value => {
-                                                    if (!value && profileImgUrl == '') {
+                                                    if (!value && profileImgUrl === '') {
                                                         return "Profile picture is required";
                                                     }
                                                     return true

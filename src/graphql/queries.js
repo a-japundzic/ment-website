@@ -25,6 +25,7 @@ export const getMenteeProfile = /* GraphQL */ `
       schoolName
       programOfStudy
       educationLevel
+      learningGoals
       graduationYear
       createdAt
       updatedAt
@@ -55,7 +56,44 @@ export const listMenteeProfiles = /* GraphQL */ `
         profilePicKey
         schoolName
         programOfStudy
+        identityId
+        learningGoals
         educationLevel
+        graduationYear
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const mentorListMenteeProfiles = /* GraphQL */ `
+  query ListMenteeProfiles(
+    $filter: ModelMenteeProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listMenteeProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        firstName
+        lastName
+        gender
+        age
+        ethnicity
+        languages
+        values
+        instagram
+        facebook
+        linkedin
+        profilePicKey
+        schoolName
+        identityId
+        programOfStudy
+        educationLevel
+        learningGoals
         graduationYear
         createdAt
         updatedAt
@@ -150,6 +188,22 @@ export const listMentorProfiles = /* GraphQL */ `
     }
   }
 `;
+export const listMentorMeetingList = /* GraphQL */ `
+  query ListMentorProfiles(
+    $filter: ModelMentorProfileFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listMentorProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        meetingList
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const menteeListMentorProfiles = /* GraphQL */ `
   query ListMentorProfiles(
     $filter: ModelMentorProfileFilterInput
@@ -173,6 +227,7 @@ export const menteeListMentorProfiles = /* GraphQL */ `
         bio
         identityId
         experience
+        meetingList
         calendly
         createdAt
         updatedAt
@@ -192,7 +247,7 @@ export const getMenteePreferences = /* GraphQL */ `
       mentorshipType
       mentorshipFrequency
       mentorshipGoal
-      comments
+      learningGoals
       menteeId
       createdAt
       updatedAt
@@ -218,7 +273,7 @@ export const listMenteePreferences = /* GraphQL */ `
         mentorshipType
         mentorshipFrequency
         mentorshipGoal
-        comments
+        learningGoals
         menteeId
         createdAt
         updatedAt

@@ -10,11 +10,12 @@ import IMG from '../assets/menteePreferences3.png'
 import { getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import * as mutations from '../graphql/mutations';
-import { listMenteePreferences } from '../graphql/queries';
+import { listMenteePreferences, listMenteeProfiles } from '../graphql/queries';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Oval } from 'react-loader-spinner';
 
 import '../css/checkbox.css'
+import { ErrorMessage } from '@hookform/error-message';
 
 const client = generateClient();
 
@@ -77,9 +78,8 @@ const MenteePreferences3 = ({ settings=false }) => {
     const [state, setAppState] = useAppState();
     const { handleSubmit, 
             register,
-            control,
             formState: { errors },
-            reset
+            // reset
         } = useForm({ defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -99,13 +99,40 @@ const MenteePreferences3 = ({ settings=false }) => {
                 const menteeInput = {
                     id: menteePreferences.id,
                     mentorshipGoal: data.mentorshipGoal,
-                    comments: data.menteeComments,
+                    learningGoals: data.menteeLearningGoals,
                 };
             
-                const updateMenteePreferences = await client.graphql({
+                await client.graphql({
                     query: mutations.updateMenteePreferences,
                     variables: { input: menteeInput }
                 });
+
+                // Add to profile so it can be displayed on the mentee profile
+                const variables = {
+                    filter: {
+                        owner: {
+                            contains: username
+                        }
+                    }
+                };
+    
+                const response = await client.graphql({
+                    query: listMenteeProfiles,
+                    variables: variables
+                });
+    
+                let profileId = response?.data?.listMenteeProfiles?.items[0].id;
+
+                const menteeProfileInput = {
+                    id: profileId,
+                    learningGoals: data.menteeLearningGoals,
+                }
+
+                await client.graphql({
+                    query: mutations.updateMenteeProfile,
+                    variables: { input: menteeProfileInput }
+                })
+                // 
     
                 // console.log(updateMenteePreferences);
             } catch (error) {
@@ -238,11 +265,17 @@ const MenteePreferences3 = ({ settings=false }) => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeComments" className="form-label tw-font-dmsans">Additional comments about your ideal mentor?</label>
+                                    <label htmlFor="menteeLearningGoals" className="form-label tw-font-dmsans">What are your learning goals?</label>
+                                    <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     <textarea 
-                                        {...register("menteeComments")}
-                                        className="form-control tw-font-dmsans tw-h-[125px]" id="menteeComments" 
-                                        defaultValue={(menteePreferences?.comments && !state?.menteeComments) ? menteePreferences.comments : ""}
+                                        {...register("menteeLearningGoals", {required: "Your learning goals are required"})}
+                                        className="form-control tw-font-dmsans tw-h-[125px]" id="menteeLearningGoals" placeholder='Feel free to use this section to also tell us more about yourself!'
+                                        defaultValue={(menteePreferences?.learningGoals && !state?.menteeLearningGoals) ? menteePreferences.learningGoals : ""}
+                                    />
+                                    <ErrorMessage
+                                        errors={errors}
+                                        name="menteeLearningGoals"
+                                        render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
                                     />
                                 </div>
                             </div>

@@ -11,7 +11,7 @@ import { generateClient } from "aws-amplify/api";
 import { getUrl } from "aws-amplify/storage";
 
 import { Oval } from 'react-loader-spinner';
-import NavBar from "../combinedFlow/NavBar";
+import NavBar from "./NavBar";
 
 const client = generateClient();
 
@@ -121,33 +121,33 @@ const Mentors = () => {
   })
 
   // Fetches the current user based off the username given above
-  // const explore = useQuery({
-  //   queryKey: ["explore"],
-  //   queryFn: async () => {
-  //     const topThreeMatches = await client.graphql({
-  //         query: menteeListMentorProfiles,
-  //     });
+  const explore = useQuery({
+    queryKey: ["explore"],
+    queryFn: async () => {
+      const topThreeMatches = await client.graphql({
+          query: menteeListMentorProfiles,
+      });
 
-  //     // Retreiving top three mentors images
-  //     const exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
-  //     const exploreListLen = exploreList.length;
+      // Retreiving top three mentors images
+      const exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
+      const exploreListLen = exploreList.length;
 
-  //     for (var i = 0; i < exploreListLen; ++i){
-  //       const signedURL = await getUrl({ 
-  //         key: exploreList[i].profilePicKey,
-  //         options: {
-  //           accessLevel: 'protected',
-  //           targetIdentityId: exploreList[i].identityId,
-  //           validateObjectExistence: true,
-  //         }
-  //       });
+      for (var i = 0; i < exploreListLen; ++i){
+        const signedURL = await getUrl({ 
+          key: exploreList[i].profilePicKey,
+          options: {
+            accessLevel: 'protected',
+            targetIdentityId: exploreList[i].identityId,
+            validateObjectExistence: true,
+          }
+        });
 
-  //       exploreList[i]["imageURL"] = signedURL.url.toString();
-  //     }
+        exploreList[i]["imageURL"] = signedURL.url.toString();
+      }
 
-  //     return exploreList;
-  //   }
-  // })
+      return exploreList;
+    }
+  })
 
   return (
     <div >
@@ -194,7 +194,7 @@ const Mentors = () => {
           </h2>
         </div>
 
-        {/* {( explore.isLoading &&
+        {( explore.isLoading &&
           <div className="d-flex justify-content-center mt-5">
             <Oval className="tw-duration-300" visible={true} color="#5685C9" secondaryColor='#5685C9' width="35" height="35" strokeWidth={4} strokeWidthSecondary={4} />
           </div>
@@ -220,7 +220,7 @@ const Mentors = () => {
               </div>
             ))}
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

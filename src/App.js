@@ -1,5 +1,5 @@
 import SignIn from "./combinedFlow/SignIn";
-import Settings from "./combinedFlow/Settings";
+import Settings from "./menteeFlow/Settings";
 
 import MenteeSignUp from "./menteeFlow/MenteeSignUp";
 import PasswordVerification from "./menteeFlow/PasswordVerification";
@@ -30,6 +30,10 @@ import { AppProvider } from "./state";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import MentorProfile from "./menteeFlow/MentorProfile";
+import MenteeBookings from "./menteeFlow/Bookings";
+import MentorBookings from "./mentorFlow/Bookings";
+import MentorSettings from "./mentorFlow/Settings";
+import MenteeProfile from "./mentorFlow/MenteeProfile";
 
 
 
@@ -55,6 +59,7 @@ function App() {
               <Route path="/loadingScreen" element={<LoadingScreen/>} />
               <Route path="/mentorSignUp" element={<MentorSignUp/>} />
               <Route path="/mentorPasswordVerification" element={<MentorPasswordVerification/>} />
+
               <Route path="/mentorPersonalInfo" element={<MentorProfileSetup1/>} />
               <Route path="/mentorPersonalInfo2" element={<MentorProfileSetup2/>} />
               <Route path="/mentorBackground" element={<Background/>} />
@@ -66,6 +71,10 @@ function App() {
               <Route path="/menteeHome" element={<Mentors />} />
               <Route path="/mentorProfile" element={<MentorProfile />} />
               <Route path="/profileSettings" element={<Settings />} />
+              <Route path="/menteeBookings" element={<MenteeBookings />} />
+              <Route path="/mentorBookings" element={<MentorBookings />} />
+              <Route path="/mentorProfileSettings" element={<MentorSettings />} />
+              <Route path="/menteeProfile" element={<MenteeProfile />} />
             </Routes>
           </Router>
         </AppProvider>

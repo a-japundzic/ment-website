@@ -15,7 +15,7 @@ import { Oval } from 'react-loader-spinner';
 
 const client = generateClient();
 
-const Background = () => {
+const Background = ({ settings=false }) => {
   // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
   const [username, setUsername] = useState('');
   const navigate = useNavigate();
@@ -73,9 +73,8 @@ const Background = () => {
   const [state, setAppState] = useAppState();
   const { handleSubmit, 
       register,
-      control,
       formState: { errors },
-      reset
+      // reset
   } = useForm({defaultValues: state, criteriaMode: "all" });
 
   const saveData = (data) => {
@@ -102,7 +101,7 @@ const Background = () => {
                   experience: experienceArr,
               };
           
-              const updateMentor = await client.graphql({
+              await client.graphql({
                   query: mutations.updateMentorProfile,
                   variables: { input: mentorDetails }
               });
@@ -111,7 +110,11 @@ const Background = () => {
           }
       },
       onSuccess:  () => {
-          navigate("/mentorSchedule", {replace: true});
+          setLoading(false);
+
+          if (!settings) {
+            navigate("/mentorSchedule", {replace: true});
+          }
       },
       onMutate: () => {
           setLoading(true);
@@ -119,20 +122,22 @@ const Background = () => {
   })
 
   // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-  useEffect(() => {
-      if (isSuccess && !state && userProfile[0].length > 0) {
-          reset({
-            menotrBio: userProfile[0].bio,
-            mentorExperience1: userProfile[0].experience[0] ? userProfile.experience[0] : '',
-            mentorExperience2: userProfile[0].experience[1] ? userProfile.experience[1] : '',
-            mentorExperience3: userProfile[0].experience[2] ? userProfile.experience[2] : '',
-          })
-      }
-  }, [])
+  // useEffect(() => {
+  //     if (isSuccess && !state && userProfile[0].length > 0) {
+  //         reset({
+  //           menotrBio: userProfile[0].bio,
+  //           mentorExperience1: userProfile[0].experience[0] ? userProfile.experience[0] : '',
+  //           mentorExperience2: userProfile[0].experience[1] ? userProfile.experience[1] : '',
+  //           mentorExperience3: userProfile[0].experience[2] ? userProfile.experience[2] : '',
+  //         })
+  //     }
+  // }, [])
 
 
   return (
-    <div className="d-flex flex-column min-vh-100 justify-content-center">
+    <div className={settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
+
+      {(!settings &&
       <nav className="navbar fixed-top bg-white navbar-expand-lg">
         <div className="container-fluid">
           <a className="navbar-brand" href="/">
@@ -140,10 +145,12 @@ const Background = () => {
           </a>
         </div>
       </nav>
+      )}
 
       <form onSubmit={handleSubmit(saveData)}>
         {isSuccess && !isLoading && (
         <div className="container h-100">
+          {( !settings &&
           <div className="row">
             <div className="col">
               <div className="progress" role="progressbar">
@@ -154,6 +161,9 @@ const Background = () => {
               </div>
             </div>
           </div>
+          )}
+
+          {( !settings &&
           <div className="row gx-5 mt-5">
             <div className="col">
               <h1 className="tw-font-oceanwide">About your background</h1>
@@ -170,6 +180,23 @@ const Background = () => {
               Help us get to know you better.
             </p>
           </div>
+          )}
+
+          {( settings &&
+          <div className="row gx-5 mt-5">
+              <div className='col'>
+                  <p className="tw-font-dmsans">
+                      Make your required changes and then press the "submit changes" button.
+                  </p>
+              </div>
+              <div className="col">
+                  <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                      {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                      {!loading && ("Submit Changes")}
+                  </button>
+              </div>
+          </div>
+          )}
 
           <div className="row gx-5 gy-5 align-items-center mt-2">
             <div className="col">

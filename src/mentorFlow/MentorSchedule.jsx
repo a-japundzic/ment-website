@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react'
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message"
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../state';
-import Select from 'react-select'
 
 import LOGO from '../assets/logo.png'
 
@@ -12,13 +11,12 @@ import { generateClient } from 'aws-amplify/api';
 import * as mutations from '../graphql/mutations';
 import { listMentorProfiles } from '../graphql/queries';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { getUrl } from 'aws-amplify/storage';
 import { Oval } from 'react-loader-spinner';
 import { InlineWidget } from 'react-calendly';
 
 const client = generateClient();
 
-const MentorSchedule = () => {
+const MentorSchedule = ({ settings=false }) => {
     // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
     const [username, setUsername] = useState('');
     const navigate = useNavigate();
@@ -77,11 +75,8 @@ const MentorSchedule = () => {
     const [state, setAppState] = useAppState();
     const { handleSubmit, 
         register,
-        control,
         formState: { errors },
-        reset,
         watch,
-        getValues
     } = useForm({defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -101,7 +96,7 @@ const MentorSchedule = () => {
                     calendly: data.mentorCalendly,
                 };
             
-                const updateMentor = await client.graphql({
+                await client.graphql({
                     query: mutations.updateMentorProfile,
                     variables: { input: mentorDetails }
                 });
@@ -110,7 +105,11 @@ const MentorSchedule = () => {
             }
         },
         onSuccess:  () => {
-            navigate("/mentorExpertise", {replace: true});
+            setLoading(false);
+
+            if (!settings) {
+                navigate("/mentorExpertise", {replace: true});
+            }
         },
         onMutate: () => {
             setLoading(true);
@@ -118,16 +117,18 @@ const MentorSchedule = () => {
     })
 
     // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    useEffect(() => {
-        if (isSuccess && !state && userProfile[0].length > 0) {
-            reset({
-                mentorCalendly: userProfile[0].calendly,
-            })
-        }
-    }, [])
+    // useEffect(() => {
+    //     if (isSuccess && !state && userProfile[0].length > 0) {
+    //         reset({
+    //             mentorCalendly: userProfile[0].calendly,
+    //         })
+    //     }
+    // }, [])
 
     return (
-        <div className="d-flex flex-column min-vh-100 justify-content-center">
+        <div className={settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
+
+            {( !settings && 
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
@@ -135,10 +136,12 @@ const MentorSchedule = () => {
                     </a>
                 </div>
             </nav>
+            )}
 
             <form onSubmit={handleSubmit(saveData)}>
             {isSuccess && !isLoading && (
                 <div className="container h-100">
+                    {( !settings &&
                     <div className="row">
                         <div className="col">
                             <div className="progress" role="progressbar" >
@@ -146,6 +149,9 @@ const MentorSchedule = () => {
                             </div>
                         </div>
                     </div>
+                    )}
+
+                    {( !settings && 
                     <div className="row gx-5 mt-5">
                         <div className="col">
                             <h1 className="tw-font-oceanwide">Your available schedule.</h1>
@@ -160,19 +166,37 @@ const MentorSchedule = () => {
                         
                         <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Enter your calendly link below! This will be how your mentees schedule meetings with you.</p>
                     </div>
+                    )}
+
+                    {( settings &&
+                    <div className="row gx-5 mt-5">
+                        <div className='col'>
+                            <p className="tw-font-dmsans">
+                                Make your required changes and then press the "submit changes" button.
+                            </p>
+                        </div>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Submit Changes")}
+                            </button>
+                        </div>
+                    </div>
+                    )}
+
                     <div className="row gx-5 gy-5 mt-2">
                         <div className="col">
                             <h6 className='tw-font-dmsans'>Follow the following steps to successfully set up your calander:</h6>
                             <p className='tw-font-dmsans mt-3'>
-                                <a href='https://calendly.com/signup' target="_blank" className="tw-font-dmsans tw-font-bold tw-text-[#5685C9]">
+                                <a href='https://calendly.com/signup' target="_blank" rel="noreferrer" className="tw-font-dmsans tw-font-bold tw-text-[#5685C9]">
                                     1. Sign up for a Calendly account
                                 </a>
                                 <br />
-                                <a href='https://help.calendly.com/hc/en-us/articles/14073239908247-Create-a-new-event#create-a-new-event-0-0p' target="_blank" className="tw-font-dmsans tw-font-bold tw-text-[#5685C9]">
+                                <a href='https://help.calendly.com/hc/en-us/articles/14073239908247-Create-a-new-event#create-a-new-event-0-0p' target="_blank" rel="noreferrer" className="tw-font-dmsans tw-font-bold tw-text-[#5685C9]">
                                     2. Create an new event for mentoring
                                 </a>
                                 <br />
-                                <a href='https://help.calendly.com/hc/en-us/articles/223193448-Sharing-your-scheduling-link#1' target="_blank" className="tw-font-dmsans tw-font-bold tw-text-[#5685C9]">
+                                <a href='https://help.calendly.com/hc/en-us/articles/223193448-Sharing-your-scheduling-link#1' target="_blank" rel="noreferrer" className="tw-font-dmsans tw-font-bold tw-text-[#5685C9]">
                                     3. Share your Calendly scheduling link
                                 </a>
                             </p>

@@ -194,7 +194,7 @@ export default function MenteePreferencesCreateForm(props) {
     mentorshipType: [],
     mentorshipFrequency: [],
     mentorshipGoal: [],
-    comments: "",
+    learningGoals: "",
     menteeId: "",
   };
   const [owner, setOwner] = React.useState(initialValues.owner);
@@ -210,7 +210,9 @@ export default function MenteePreferencesCreateForm(props) {
   const [mentorshipGoal, setMentorshipGoal] = React.useState(
     initialValues.mentorshipGoal
   );
-  const [comments, setComments] = React.useState(initialValues.comments);
+  const [learningGoals, setLearningGoals] = React.useState(
+    initialValues.learningGoals
+  );
   const [menteeId, setMenteeId] = React.useState(initialValues.menteeId);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
@@ -223,7 +225,7 @@ export default function MenteePreferencesCreateForm(props) {
     setCurrentMentorshipFrequencyValue("");
     setMentorshipGoal(initialValues.mentorshipGoal);
     setCurrentMentorshipGoalValue("");
-    setComments(initialValues.comments);
+    setLearningGoals(initialValues.learningGoals);
     setMenteeId(initialValues.menteeId);
     setErrors({});
   };
@@ -245,7 +247,7 @@ export default function MenteePreferencesCreateForm(props) {
     mentorshipType: [],
     mentorshipFrequency: [],
     mentorshipGoal: [],
-    comments: [],
+    learningGoals: [],
     menteeId: [],
   };
   const runValidationTasks = async (
@@ -279,7 +281,7 @@ export default function MenteePreferencesCreateForm(props) {
           mentorshipType,
           mentorshipFrequency,
           mentorshipGoal,
-          comments,
+          learningGoals,
           menteeId,
         };
         const validationResponses = await Promise.all(
@@ -348,7 +350,7 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType,
               mentorshipFrequency,
               mentorshipGoal,
-              comments,
+              learningGoals,
               menteeId,
             };
             const result = onChange(modelFields);
@@ -374,7 +376,7 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType,
               mentorshipFrequency,
               mentorshipGoal,
-              comments,
+              learningGoals,
               menteeId,
             };
             const result = onChange(modelFields);
@@ -430,7 +432,7 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType: values,
               mentorshipFrequency,
               mentorshipGoal,
-              comments,
+              learningGoals,
               menteeId,
             };
             const result = onChange(modelFields);
@@ -483,7 +485,7 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType,
               mentorshipFrequency: values,
               mentorshipGoal,
-              comments,
+              learningGoals,
               menteeId,
             };
             const result = onChange(modelFields);
@@ -542,7 +544,7 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType,
               mentorshipFrequency,
               mentorshipGoal: values,
-              comments,
+              learningGoals,
               menteeId,
             };
             const result = onChange(modelFields);
@@ -586,10 +588,10 @@ export default function MenteePreferencesCreateForm(props) {
         ></TextField>
       </ArrayField>
       <TextField
-        label="Comments"
+        label="Learning goals"
         isRequired={false}
         isReadOnly={false}
-        value={comments}
+        value={learningGoals}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
@@ -599,21 +601,21 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType,
               mentorshipFrequency,
               mentorshipGoal,
-              comments: value,
+              learningGoals: value,
               menteeId,
             };
             const result = onChange(modelFields);
-            value = result?.comments ?? value;
+            value = result?.learningGoals ?? value;
           }
-          if (errors.comments?.hasError) {
-            runValidationTasks("comments", value);
+          if (errors.learningGoals?.hasError) {
+            runValidationTasks("learningGoals", value);
           }
-          setComments(value);
+          setLearningGoals(value);
         }}
-        onBlur={() => runValidationTasks("comments", comments)}
-        errorMessage={errors.comments?.errorMessage}
-        hasError={errors.comments?.hasError}
-        {...getOverrideProps(overrides, "comments")}
+        onBlur={() => runValidationTasks("learningGoals", learningGoals)}
+        errorMessage={errors.learningGoals?.errorMessage}
+        hasError={errors.learningGoals?.hasError}
+        {...getOverrideProps(overrides, "learningGoals")}
       ></TextField>
       <TextField
         label="Mentee id"
@@ -629,7 +631,7 @@ export default function MenteePreferencesCreateForm(props) {
               mentorshipType,
               mentorshipFrequency,
               mentorshipGoal,
-              comments,
+              learningGoals,
               menteeId: value,
             };
             const result = onChange(modelFields);

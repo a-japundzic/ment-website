@@ -7,7 +7,7 @@ import Select from 'react-select'
 
 import LOGO from '../assets/logo.png'
 
-import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import * as mutations from '../graphql/mutations';
 import { listMenteeProfiles } from '../graphql/queries';
@@ -90,7 +90,7 @@ const ProfileSetup1 = ({ settings=false }) => {
             register,
             control,
             formState: { errors },
-            reset
+            // reset
         } = useForm({defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -125,9 +125,11 @@ const ProfileSetup1 = ({ settings=false }) => {
                 // Simplify the formatting of the user's lenguage input
                 let menteeLanguageArr = [];
                 var languageArrayLen = data.menteeLanguage.length;
-                for (var i = 0; i < languageArrayLen; i++) {
-                    menteeLanguageArr.push(data.menteeLanguage[i].value);
+                for (var y = 0; y < languageArrayLen; y++) {
+                    menteeLanguageArr.push(data.menteeLanguage[y].value);
                 }
+
+                const cred = await fetchAuthSession();
     
                 const menteeDetails = {
                     firstName: data.menteeFirstName,
@@ -136,6 +138,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                     age: data.menteeAge,
                     ethnicity: menteeEthnicityArr,
                     languages: menteeLanguageArr,
+                    identityId: cred?.identityId,
                 };
             
                 const newMentee = await client.graphql({
@@ -200,8 +203,8 @@ const ProfileSetup1 = ({ settings=false }) => {
                 // Simplify the formatting of the user's lenguage input
                 let menteeLanguageArr = [];
                 var languageArrayLen = data.menteeLanguage.length;
-                for (var i = 0; i < languageArrayLen; i++) {
-                    menteeLanguageArr.push(data.menteeLanguage[i].value);
+                for (var z = 0; z < languageArrayLen; z++) {
+                    menteeLanguageArr.push(data.menteeLanguage[z].value);
                 }
     
                 // Upload the profile pic file:
@@ -216,7 +219,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                     }).result;
                 
     
-                    if (userProfile[0]?.profilePicKey && result?.key != userProfile[0]?.profilePicKey) {
+                    if (userProfile[0]?.profilePicKey && result?.key !== userProfile[0]?.profilePicKey) {
                         await remove({ key: userProfile[0]?.profilePicKey });
                     }
         
@@ -319,24 +322,24 @@ const ProfileSetup1 = ({ settings=false }) => {
     }
 
     // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    useEffect(() => {
-        if (isSuccess && !state && userProfile[0].length > 0) {
-            const resetMenteeGender = genderOptions.find(op => {
-                return op.value === userProfile[0].gender
-            })
+    // useEffect(() => {
+    //     if (isSuccess && !state && userProfile[0].length > 0) {
+    //         const resetMenteeGender = genderOptions.find(op => {
+    //             return op.value === userProfile[0].gender
+    //         })
 
-            console.log("test");
+    //         console.log("test");
 
-            reset({
-                menteeFirstName: userProfile[0].firstName,
-                menteeLastName: userProfile[0].lastName,
-                menteeGender: resetMenteeGender,
-                menteeAge: userProfile[0].menteeAge,
-                menteeEthnicity: formatEthnicity().map(ele => ele),
-                menteeLanguage: formatLanguage().map(ele => ele),
-            })
-        }
-    }, [])
+    //         reset({
+    //             menteeFirstName: userProfile[0].firstName,
+    //             menteeLastName: userProfile[0].lastName,
+    //             menteeGender: resetMenteeGender,
+    //             menteeAge: userProfile[0].menteeAge,
+    //             menteeEthnicity: formatEthnicity().map(ele => ele),
+    //             menteeLanguage: formatLanguage().map(ele => ele),
+    //         })
+    //     }
+    // }, [])
 
 
     // Sets customer styles of drop down menu
@@ -691,7 +694,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                                         {...register("menteeProfilePicture", {
                                             validate: {
                                                 required: value => {
-                                                    if (!value && profileImgUrl == '') {
+                                                    if (!value && profileImgUrl === '') {
                                                         return "Profile picture is required";
                                                     }
                                                     return true

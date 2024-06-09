@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
-import LOGO from "../assets/logo.png";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import Hamburger from "hamburger-react";
-import Mentor1 from "../assets/Mentor1.png";
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useCalendlyEventListener, InlineWidget } from "react-calendly";
 
 import Instagram from "../assets/instagram.png"
 import Facebook from "../assets/facebook.png"
 import LinkedIn from "../assets/linkedin.png"
-import NavBar from "../combinedFlow/NavBar";
+import NavBar from "./NavBar";
 import * as mutations from '../graphql/mutations';
 import { useMutation } from "@tanstack/react-query";
 import { getCurrentUser } from "aws-amplify/auth";
@@ -19,24 +16,13 @@ import "../css/popup.css"
 
 const client = generateClient();
 
-const MentorProfile = ({ settings }) => {
-  // const [state, setAppState] = useAppState();
-  // const navigate = useNavigate();
-  const [isOpen, setOpen] = useState(false);
+const MentorProfile = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const closeModal = () => setShowPopup(false);
   const closeConfirm = () => setShowConfirmPopup(false);
 
-  const handleClick = () => {
-    setOpen(!isOpen);
-  };
-
   const {state} = useLocation();
-
-  useEffect(() => {
-    console.log(state);
-  }, [state]);
 
   const updateMeetingList = useMutation({
     mutationFn: async () => {
@@ -57,10 +43,8 @@ const MentorProfile = ({ settings }) => {
           variables: variables
         });
 
-        console.log(response);
         let menteeMeetingList = response?.data?.listMenteeProfiles?.items[0]?.meetingList;
         const menteeId = response?.data?.listMenteeProfiles?.items[0]?.id;
-        console.log(menteeId);
 
         // Initialize list if necessary
         if (!menteeMeetingList) {
@@ -77,7 +61,7 @@ const MentorProfile = ({ settings }) => {
             meetingList: menteeMeetingList
           }
 
-          const updatedMenteeList = await client.graphql({
+          await client.graphql({
             query: mutations.updateMenteeMeetingList,
             variables: { input: menteeDetails },
           });
@@ -99,12 +83,12 @@ const MentorProfile = ({ settings }) => {
             meetingList: mentorMeetingList,
           }
 
-          const updatedMentorList = await client.graphql({
+          await client.graphql({
             query: mutations.updateMentorMeetingList,
             variables: { input: mentorDetails },
           })
 
-          showConfirmPopup(true);
+          setShowConfirmPopup(true);
           // 
 
           // Print to error check (comment out as required)
@@ -123,45 +107,51 @@ const MentorProfile = ({ settings }) => {
   })
 
   useCalendlyEventListener({
-    onEventScheduled: (e) => updateMeetingList.mutate(),
+    onEventScheduled: () => updateMeetingList.mutate(),
   });
 
   return (
     <div>
       {/* Popup in case a meeting is double booked */}
       <Popup open={showPopup} modal closeOnDocumentClick onClose={closeModal}>
-        <h2 className="tw-font-oceanwide tw-text-center mt-1">Heads Up!</h2>
-        <p className="tw-font-dmsans tw-text-center ">
-          You have already booked a meeting with this mentor. <br />
-          Please avoid double booking mentors as they are
-          extremely busy. If this wasn't planned, please cancel the meeting
-          using the confirmation email you were sent. Thank you!
-        </p> 
-        <div className="d-flex justify-content-center">
-          <button className="mt-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-1 tw-px-3 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300" onClick={closeModal}>I understand</button>
+        <div className="px-3 py-3">
+          <h2 className="tw-font-oceanwide tw-text-center mt-1">Heads Up!</h2>
+          <p className="tw-font-dmsans tw-text-center ">
+            You have already booked a meeting with this mentor.
+            Please avoid double booking mentors as they are
+            extremely busy. If this wasn't planned, please cancel the meeting
+            using the confirmation email you were sent. Thank you!
+          </p> 
+          <div className="d-flex justify-content-center">
+            <button className="tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-2 tw-px-3 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300" onClick={closeModal}>I understand</button>
+          </div>
         </div>
       </Popup>
 
       {/* Popup in case a meeting booking is successful */}
       <Popup open={showConfirmPopup} modal closeOnDocumentClick onClose={closeConfirm}>
-        <h2 className="tw-font-oceanwide tw-text-center mt-1">Next Steps</h2>
-        <p className="tw-font-dmsans tw-text-center ">
-          Your meeting has been booked with <b>{state.mentor.firstName}</b>.
-          For a meeting link and next steps check your email. If you don't
-          see the email, check your junk/spam folder.
-        </p> 
-        <div className="d-flex justify-content-center">
-          <button className="mt-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-1 tw-px-3 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300" onClick={closeConfirm}>Close</button>
+        <div className="py-3 px-3">
+          <h2 className="tw-font-oceanwide tw-text-center mt-1">Next Steps</h2>
+          <p className="tw-font-dmsans tw-text-center ">
+            Your meeting has been booked with <b>{state.mentor.firstName}</b>.
+            For a meeting link and next steps check your email. If you don't
+            see the email, check your junk/spam folder.
+          </p> 
+          <div className="d-flex justify-content-center">
+            <button className="tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-2 tw-px-3 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300" onClick={closeConfirm}>Close</button>
+          </div>
         </div>
       </Popup>
 
       <NavBar focused={"profile"} />
 
       <div className="container mt-5 w-100">
-        <h1 className="tw-font-oceanwide mb-4">Mentor Profile</h1>
+        <div className="row mb-3">
+         <h1 className="tw-font-oceanwide">Mentor Profile</h1>
+        </div>
         <div className="row">
-          <div className="col-lg-4">
-            <div className="card w-100" >
+          <div className="col-md-4">
+            <div className="card mt-2 w-100" >
               <img src={state.mentor.imageURL} className="card-img-top img-fluid tw-object-cover" style={{height: "22rem"}} alt="Mentor"/>
               <div className="card-body">
                 <div className="row">
@@ -204,9 +194,9 @@ const MentorProfile = ({ settings }) => {
             <p className="tw-font-dmsans">{state.mentor.bio}</p>
           </div>
 
-          <div className="col-lg-2" />
+          <div className="col-md-2" />
 
-          <div className="col-lg-6">
+          <div className="col-md-6 align-self-start">
             <h3 className="tw-font-oceanwide">Book a session</h3>
             <div className="card w-100">
               <div className="card-body">
@@ -227,7 +217,7 @@ const MentorProfile = ({ settings }) => {
               </ul>
             </div>
             <div className="col-lg-2" />
-            <div className="col-lg-4">
+            <div className="col-lg-6">
               <h5 className="tw-font-oceanwide">Values</h5>
               <ul className="list-group list-group-horizontal-md tw-font-dmsans">
                 {state.mentor.values.map((value) => {

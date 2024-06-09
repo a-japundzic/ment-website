@@ -18,7 +18,7 @@ import '../css/checkbox.css'
 
 const client = generateClient();
 
-const MentorExpertise = () => {
+const MentorExpertise = ({ settings=false }) => {
     // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
     const [username, setUsername] = useState('');
     const navigate = useNavigate();
@@ -132,7 +132,11 @@ const MentorExpertise = () => {
             }
         },
         onSuccess:  () => {
-            navigate("/mentorPreferences1", {replace: true});
+            setLoading(false);
+
+            if (!settings) {
+                navigate("/mentorPreferences1", {replace: true});
+            }
         },
         onMutate: () => {
             setLoading(true);
@@ -172,7 +176,8 @@ const MentorExpertise = () => {
     }
 
     return (
-        <div className="d-flex flex-column min-vh-100 justify-content-center">
+        <div className={settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
+            {(!settings && 
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
@@ -180,10 +185,13 @@ const MentorExpertise = () => {
                     </a>
                 </div>
             </nav>
+            )}
 
             <form onSubmit={handleSubmit(saveData)}>
                 {isSuccess && !isLoading && (
                 <div className="container h-100">
+
+                    {( !settings &&
                     <div className="row">
                         <div className="col">
                             <div className="progress" role="progressbar" >
@@ -191,6 +199,9 @@ const MentorExpertise = () => {
                             </div>
                         </div>
                     </div>
+                    )}
+
+                    {(!settings && 
                     <div className="row gx-5 mt-5">
                         <div className="col">
                             <h1 className="tw-font-oceanwide">What are your areas of expertise?</h1>
@@ -205,10 +216,28 @@ const MentorExpertise = () => {
                        
                         <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B]">Help us pair you with the right students.</p>
                     </div>
+                    )}
+
+                    {( settings &&
+                    <div className="row gx-5 mt-5">
+                        <div className='col'>
+                            <p className="tw-font-dmsans">
+                                Make your required changes and then press the "submit changes" button.
+                            </p>
+                        </div>
+                        <div className="col">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                                {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
+                                {!loading && ("Submit Changes")}
+                            </button>
+                        </div>
+                    </div>
+                    )}
+
                     <div className="row gx-5 gy-5 mt-1 align-items-center">
                         <div className="col">
                             <label htmlFor="mentorSkillsInput" className="form-label tw-font-dmsans">
-                                What skills are your skillsets?
+                                What skills are in your skillset?
                                 <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                             </label>
                             <ul className="list-group mt-1" id="mentorSkillsInput">

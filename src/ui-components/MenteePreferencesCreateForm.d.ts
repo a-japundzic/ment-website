@@ -27,7 +27,7 @@ export declare type MenteePreferencesCreateFormInputValues = {
     mentorshipType?: string[];
     mentorshipFrequency?: string[];
     mentorshipGoal?: string[];
-    comments?: string;
+    learningGoals?: string;
     menteeId?: string;
 };
 export declare type MenteePreferencesCreateFormValidationValues = {
@@ -36,7 +36,7 @@ export declare type MenteePreferencesCreateFormValidationValues = {
     mentorshipType?: ValidationFunction<string>;
     mentorshipFrequency?: ValidationFunction<string>;
     mentorshipGoal?: ValidationFunction<string>;
-    comments?: ValidationFunction<string>;
+    learningGoals?: ValidationFunction<string>;
     menteeId?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
@@ -47,7 +47,7 @@ export declare type MenteePreferencesCreateFormOverridesProps = {
     mentorshipType?: PrimitiveOverrideProps<TextFieldProps>;
     mentorshipFrequency?: PrimitiveOverrideProps<TextFieldProps>;
     mentorshipGoal?: PrimitiveOverrideProps<TextFieldProps>;
-    comments?: PrimitiveOverrideProps<TextFieldProps>;
+    learningGoals?: PrimitiveOverrideProps<TextFieldProps>;
     menteeId?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type MenteePreferencesCreateFormProps = React.PropsWithChildren<{

@@ -38,6 +38,7 @@ export declare type MenteeProfileUpdateFormInputValues = {
     programOfStudy?: string;
     educationLevel?: string;
     graduationYear?: string;
+    learningGoals?: string;
     identityId?: string;
     meetingList?: string[];
 };
@@ -58,6 +59,7 @@ export declare type MenteeProfileUpdateFormValidationValues = {
     programOfStudy?: ValidationFunction<string>;
     educationLevel?: ValidationFunction<string>;
     graduationYear?: ValidationFunction<string>;
+    learningGoals?: ValidationFunction<string>;
     identityId?: ValidationFunction<string>;
     meetingList?: ValidationFunction<string>;
 };
@@ -80,6 +82,7 @@ export declare type MenteeProfileUpdateFormOverridesProps = {
     programOfStudy?: PrimitiveOverrideProps<TextFieldProps>;
     educationLevel?: PrimitiveOverrideProps<TextFieldProps>;
     graduationYear?: PrimitiveOverrideProps<TextFieldProps>;
+    learningGoals?: PrimitiveOverrideProps<TextFieldProps>;
     identityId?: PrimitiveOverrideProps<TextFieldProps>;
     meetingList?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;

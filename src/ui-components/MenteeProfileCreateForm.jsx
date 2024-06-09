@@ -205,6 +205,7 @@ export default function MenteeProfileCreateForm(props) {
     programOfStudy: "",
     educationLevel: "",
     graduationYear: "",
+    learningGoals: "",
     identityId: "",
     meetingList: [],
   };
@@ -232,6 +233,9 @@ export default function MenteeProfileCreateForm(props) {
   const [graduationYear, setGraduationYear] = React.useState(
     initialValues.graduationYear
   );
+  const [learningGoals, setLearningGoals] = React.useState(
+    initialValues.learningGoals
+  );
   const [identityId, setIdentityId] = React.useState(initialValues.identityId);
   const [meetingList, setMeetingList] = React.useState(
     initialValues.meetingList
@@ -257,6 +261,7 @@ export default function MenteeProfileCreateForm(props) {
     setProgramOfStudy(initialValues.programOfStudy);
     setEducationLevel(initialValues.educationLevel);
     setGraduationYear(initialValues.graduationYear);
+    setLearningGoals(initialValues.learningGoals);
     setIdentityId(initialValues.identityId);
     setMeetingList(initialValues.meetingList);
     setCurrentMeetingListValue("");
@@ -288,6 +293,7 @@ export default function MenteeProfileCreateForm(props) {
     programOfStudy: [],
     educationLevel: [],
     graduationYear: [],
+    learningGoals: [],
     identityId: [],
     meetingList: [],
   };
@@ -333,6 +339,7 @@ export default function MenteeProfileCreateForm(props) {
           programOfStudy,
           educationLevel,
           graduationYear,
+          learningGoals,
           identityId,
           meetingList,
         };
@@ -413,6 +420,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -454,6 +462,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -495,6 +504,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -536,6 +546,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -577,6 +588,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -614,6 +626,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -676,6 +689,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -738,6 +752,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -804,6 +819,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -845,6 +861,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -886,6 +903,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -927,6 +945,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -968,6 +987,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -1009,6 +1029,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy: value,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -1050,6 +1071,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel: value,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -1091,6 +1113,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear: value,
+              learningGoals,
               identityId,
               meetingList,
             };
@@ -1106,6 +1129,48 @@ export default function MenteeProfileCreateForm(props) {
         errorMessage={errors.graduationYear?.errorMessage}
         hasError={errors.graduationYear?.hasError}
         {...getOverrideProps(overrides, "graduationYear")}
+      ></TextField>
+      <TextField
+        label="Learning goals"
+        isRequired={false}
+        isReadOnly={false}
+        value={learningGoals}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              owner,
+              firstName,
+              lastName,
+              gender,
+              age,
+              ethnicity,
+              languages,
+              values,
+              instagram,
+              facebook,
+              linkedin,
+              profilePicKey,
+              schoolName,
+              programOfStudy,
+              educationLevel,
+              graduationYear,
+              learningGoals: value,
+              identityId,
+              meetingList,
+            };
+            const result = onChange(modelFields);
+            value = result?.learningGoals ?? value;
+          }
+          if (errors.learningGoals?.hasError) {
+            runValidationTasks("learningGoals", value);
+          }
+          setLearningGoals(value);
+        }}
+        onBlur={() => runValidationTasks("learningGoals", learningGoals)}
+        errorMessage={errors.learningGoals?.errorMessage}
+        hasError={errors.learningGoals?.hasError}
+        {...getOverrideProps(overrides, "learningGoals")}
       ></TextField>
       <TextField
         label="Identity id"
@@ -1132,6 +1197,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId: value,
               meetingList,
             };
@@ -1169,6 +1235,7 @@ export default function MenteeProfileCreateForm(props) {
               programOfStudy,
               educationLevel,
               graduationYear,
+              learningGoals,
               identityId,
               meetingList: values,
             };

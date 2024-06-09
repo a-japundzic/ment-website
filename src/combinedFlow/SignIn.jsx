@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { getCurrentUser, signIn } from 'aws-amplify/auth';
 import { signOut } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
-import { listMenteePreferences, listMenteeProfiles, listMentorProfiles } from '../graphql/queries';
+import { listMenteePreferences, listMenteeProfiles, listMentorPreferences, listMentorProfiles } from '../graphql/queries';
 
 import { fetchUserAttributes } from 'aws-amplify/auth';
 
@@ -136,8 +136,23 @@ const SignIn = () => {
                     navigate("/mentorBackground", { replace: true });
                 } else if (!userProfile[0].calendly) {
                     navigate("/mentorSchedule", { replace: true });
-                } else {
+                } 
+
+                const preferencesResponse = await client.graphql({
+                    query: listMentorPreferences,
+                    variables: variables
+                });
+
+                const userPreferences = preferencesResponse?.data?.listMentorPreferences?.items;
+                
+                if (!userPreferences[0].mentorshipSkills) {
                     navigate("/mentorExpertise", { replace: true });
+                } else if (!userPreferences[0].mentorshipType) {
+                    navigate("/mentorPreferences1", {replace: true});
+                } else if (!userPreferences[0].mentorshipGoal) {
+                    navigate("/mentorPrferences2", {replace: true});
+                } else {
+                    navigate("/mentorBookings", {replace: true });
                 }
             }
         } catch (error) {
