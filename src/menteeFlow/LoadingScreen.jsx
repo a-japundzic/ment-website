@@ -11,10 +11,9 @@ import IMG3 from '../assets/loadingScreen3.png'
 
 import '../css/checkbox.css'
 import { getCurrentUser } from 'aws-amplify/auth'
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { listMenteePreferences, listMentorPreferences } from '../graphql/queries'
 import { generateClient } from 'aws-amplify/api'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { useNavigate } from 'react-router-dom'
 
 const slides = [
@@ -64,7 +63,6 @@ const LoadingScreen = () => {
     // Fetches the current user based off the username given above
     const {
         data: results,
-        isLoading,
         isSuccess,
     } = useQuery({
         queryKey: ["menteePreferences"],
@@ -100,9 +98,9 @@ const LoadingScreen = () => {
         setTimeout(() => {
           navigate('/menteeHome');
         }, 3000)
-    }, [])
+    }, [navigate])
 
-    const [data, setData] = useState([{}]);
+    const [returnData, setReturnData] = useState([{}]);
 
 
     useEffect(() => {
@@ -118,12 +116,12 @@ const LoadingScreen = () => {
                 res => res.json()
             ).then(
                 data => {
-                    setData(data)
-                    console.log(data)
+                    setReturnData(data)
+                    console.log(returnData)
                 }
             )
         }
-    }, [results])
+    }, [results, isSuccess, returnData])
 
 
     return (

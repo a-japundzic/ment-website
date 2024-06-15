@@ -368,8 +368,11 @@ const MentorProfileSetup1 = ({ settings=false }) => {
         let ethnicityArrayFormatted = [];
 
         for (var i = 0; i < ethnicityArrayLen; ++i) {
+             // Here to remove "unsafe references to variable(s) i warning"
+             let index = i;
+             // 
             ethnicityArrayFormatted.push(ethnicityOptions.find(op => {
-                return op.value === userProfile[0].ethnicity[i]
+                return op.value === userProfile[0].ethnicity[index]
             }));
         }
 
@@ -382,8 +385,11 @@ const MentorProfileSetup1 = ({ settings=false }) => {
         let languageArrayFormatted = [];
 
         for (var i = 0; i < languageArrayLen; ++i) {
+            // Here to remove "unsafe references to variable(s) i warning"
+            let index = i;
+            // 
             languageArrayFormatted.push(languageOptions.find(op => {
-                return op.value === userProfile[0].languages[i]
+                return op.value === userProfile[0].languages[index]
             }));
         }   
 

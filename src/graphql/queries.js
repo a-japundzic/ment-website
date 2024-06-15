@@ -105,20 +105,20 @@ export const mentorListMenteeProfiles = /* GraphQL */ `
   }
 `;
 export const listMenteeMeetingList = /* GraphQL */ `
-  query ListMenteeProfiles(
-    $filter: ModelMenteeProfileFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listMenteeProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        meetingList
-      }
-      nextToken
-      __typename
+query ListMenteeProfiles(
+  $filter: ModelMenteeProfileFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listMenteeProfiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      meetingList
     }
+    nextToken
+    __typename
   }
+}
 `;
 export const getMentorProfile = /* GraphQL */ `
   query GetMentorProfile($id: ID!) {
@@ -148,6 +148,14 @@ export const getMentorProfile = /* GraphQL */ `
 export const getMentorMeetingList = /* GraphQL */ `
   query GetMentorProfile($id: ID!) {
     getMentorProfile(id: $id) {
+      id
+      meetingList
+    }
+  }
+`;
+export const getMenteeMeetingList = /* GraphQL */ `
+  query GetMenteeProfile($id: ID!) {
+    getMenteeProfile(id: $id) {
       id
       meetingList
     }

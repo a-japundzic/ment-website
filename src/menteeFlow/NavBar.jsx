@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 const client = generateClient();
 
 const NavBar = ({ focused }) => {
-    const navigate = useNavigate();
+    useNavigate();
 
     const handleClick = () => {
         setOpen(!isOpen);
@@ -42,8 +42,6 @@ const NavBar = ({ focused }) => {
     // Fetches the current user based off the username given above
     const {
         data: profileImg,
-        isLoading,
-        isSuccess,
     } = useQuery({
         queryKey: ["profileImg"],
         queryFn: async () => {
@@ -87,7 +85,7 @@ const NavBar = ({ focused }) => {
                     </span>
                 </button>
                 <div className="collapse navbar-collapse text-end justify-content-end" id="navbarTogglerDemo02">
-                    {( focused == "home" && 
+                    {( focused === "home" && 
                     <ul className="navbar-nav align-items-center">
                         <li className="nav-item active hover:tw-text-blue">
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" aria-current="page" href="/menteeHome">Home</a>
@@ -111,7 +109,7 @@ const NavBar = ({ focused }) => {
                         </li>
                     </ul>
                     )}
-                    {( focused == "bookings" && 
+                    {( focused === "bookings" && 
                     <ul className="navbar-nav align-items-center">
                         <li className="nav-item ">
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3"  href="/menteeHome">Home</a>
@@ -135,7 +133,7 @@ const NavBar = ({ focused }) => {
                         </li>
                     </ul>
                     )}
-                    {( focused == "profile" && 
+                    {( focused === "profile" && 
                     <ul className="navbar-nav align-items-center">
                         <li className="nav-item">
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3"  href="/menteeHome">Home</a>

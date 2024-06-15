@@ -166,22 +166,22 @@ const MentorProfile = () => {
                 <div className="row align-items-center">
                   { state?.mentor?.instagram != null && (
                     <div className="col-2">
-                      <a href={state.mentor.instagram} target="_blank">
-                        <img className="img-fluid rounded" src={Instagram}></img>
+                      <a href={state.mentor.instagram} target="_blank" rel="noreferrer">
+                        <img className="img-fluid rounded" src={Instagram} alt=""></img>
                       </a>
                     </div>
                   )}
                   { state?.mentor?.facebook != null && (
                     <div className="col-2">
-                      <a href={state.mentor.facebook} target="_blank">
-                        <img className="img-fluid rounded" src={Facebook}></img>
+                      <a href={state.mentor.facebook} target="_blank" rel="noreferrer">
+                        <img className="img-fluid rounded" src={Facebook} alt=""></img>
                       </a>
                     </div>
                   )}
                   { state?.mentor?.linkedin != null && (
                     <div className="col-2">
-                      <a href={state.mentor.linkedin} target="_blank">
-                        <img className="img-fluid rounded" src={LinkedIn}></img>
+                      <a href={state.mentor.linkedin} target="_blank" rel="noreferrer">
+                        <img className="img-fluid rounded" src={LinkedIn} alt=""></img>
                       </a>
                     </div>
                   )}
@@ -210,9 +210,10 @@ const MentorProfile = () => {
               <h5 className="tw-font-oceanwide">Experience</h5>
               <ul className="list-group  tw-font-dmsans">
                 {state.mentor.experience.map((job) => {
-                  if (job != "") {
+                  if (job !== "") {
                     return <li className="list-group-item">{job}</li>
                   }
+                  return "";
                 })}
               </ul>
             </div>
@@ -221,9 +222,10 @@ const MentorProfile = () => {
               <h5 className="tw-font-oceanwide">Values</h5>
               <ul className="list-group list-group-horizontal-md tw-font-dmsans">
                 {state.mentor.values.map((value) => {
-                  if (value != "") {
+                  if (value !== "") {
                     return <li className="list-group-item">{value}</li>
                   }
+                  return "";
                 })}
               </ul>
             </div>

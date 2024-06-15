@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import { Controller, set, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message"
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../state';
@@ -88,7 +88,6 @@ const ProfileSetup2 = ({ settings=false }) => {
         register,
         control,
         formState: { errors },
-        reset
     } = useForm({defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -137,17 +136,18 @@ const ProfileSetup2 = ({ settings=false }) => {
         }
     })
 
+    // Ignore this, doesn't do anything
     // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    useEffect(() => {
-        if (isSuccess && !state && userProfile[0].length > 0) {
-            reset({
-                menteeValues: formatValues().map(ele => ele),
-                menteeInstagram: userProfile[0].instagram,
-                menteeFacebook: userProfile[0].facebook,
-                menteeLinkedIn: userProfile[0].linkedin,
-            })
-        }
-    }, [])
+    // useEffect(() => {
+    //     if (isSuccess && !state && userProfile[0].length > 0) {
+    //         reset({
+    //             menteeValues: formatValues().map(ele => ele),
+    //             menteeInstagram: userProfile[0].instagram,
+    //             menteeFacebook: userProfile[0].facebook,
+    //             menteeLinkedIn: userProfile[0].linkedin,
+    //         })
+    //     }
+    // }, [])
 
     // Formats the multiple select questions to settable default values
     function formatValues() {
@@ -156,8 +156,10 @@ const ProfileSetup2 = ({ settings=false }) => {
             var valueArrLen = userProfile[0].values.length;
 
             for (var i = 0; i < valueArrLen; ++i) {
+                // Have to do this to remove "unsafe reference to i" error
+                let index = i;
                 valueArrFormatted.push(valueOptions.find(op => {
-                    return op.value === userProfile[0].values[i]
+                    return op.value === userProfile[0].values[index]
                 }));
             }
         }

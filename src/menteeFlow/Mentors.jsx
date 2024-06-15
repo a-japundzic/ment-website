@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import '../css/navbar.css'
 import { useQuery } from "@tanstack/react-query";
 import { listMenteePreferences, listMentorPreferences, menteeListMentorProfiles } from "../graphql/queries";
-import { getCurrentUser, signUp } from "aws-amplify/auth";
+import { getCurrentUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
 import { getUrl } from "aws-amplify/storage";
 
@@ -17,11 +17,7 @@ const client = generateClient();
 
 const Mentors = () => {
   const navigate = useNavigate();
-  const saveData = (data) => {
-    // This navigates you to the next page when the next button is clicked
-    navigate("/Top");
-  };
-
+  
   // ************************* Fetch current user profile if it exists, and define appropriate variables ************************
   const [username, setUsername] = useState('');
 
@@ -41,7 +37,6 @@ const Mentors = () => {
   }, [username]);
 
   const [data, setData] = useState([{}]);
-  const [pictures, setPictures] = useState({});
 
     // Fetches the current user based off the username given above
   const topThree = useQuery({

@@ -76,9 +76,7 @@ const MenteePreferences = ({ settings=false }) => {
     const [state, setAppState] = useAppState();
     const { handleSubmit, 
             register,
-            control,
             formState: { errors },
-            reset
         } = useForm({ defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -104,7 +102,7 @@ const MenteePreferences = ({ settings=false }) => {
                     mentorshipSkills: data.mentorshipSkills,
                 };
             
-                const newMenteePreferences = await client.graphql({
+                await client.graphql({
                     query: mutations.createMenteePreferences,
                     variables: { input: menteeInput }
                 });
@@ -135,7 +133,7 @@ const MenteePreferences = ({ settings=false }) => {
                     mentorshipSkills: data.mentorshipSkills,
                 };
             
-                const updateMenteePreferences = await client.graphql({
+                await client.graphql({
                     query: mutations.updateMenteePreferences,
                     variables: { input: menteeInput }
                 });

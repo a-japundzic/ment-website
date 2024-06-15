@@ -9,9 +9,9 @@ import MenteePreferences2 from "./MenteePreferences2";
 import MenteePreferences3 from "./MenteePreferences3";
 import { useMutation } from "@tanstack/react-query";
 import Popup from "reactjs-popup";
-import { deleteUser, getCurrentUser } from "aws-amplify/auth";
+import { deleteUser, getCurrentUser, signOut } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
-import { listMenteePreferences, listMenteeProfiles } from "../graphql/queries";
+import { getMentorMeetingList, listMenteeMeetingList, listMenteePreferences, listMenteeProfiles } from "../graphql/queries";
 import * as mutations from '../graphql/mutations';
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +24,15 @@ function Settings() {
   const closeConfirm = () => setShowConfirmPopup(false);
 
   const navigate = useNavigate();
+
+  async function handleSignOut() {
+    try {
+        await signOut();
+        navigate("/", {replace: true});
+    } catch (error) {
+        console.log('error signing out: ', error);
+    }
+  }
 
   const getTabComponent = () => {
     switch (activeTab) {
@@ -59,9 +68,48 @@ function Settings() {
           }
         };
 
+        // Remove mentee from all mentors meeting lists
+        const listResponse = await client.graphql({
+          query: listMenteeMeetingList,
+          variables: variables,
+        })
+
+        const meetingList = listResponse?.data?.listMenteeProfiles?.items[0].meetingList;
+        const menteeId = listResponse?.data?.listMenteeProfiles?.items[0].id;
+        const listLen = meetingList.length;
+
+        // Loop through each mentor on meeting list
+        for (let i = 0; i < listLen; ++i) {
+          // Get mentor's meeting list
+          const mentorListResponse = await client.graphql({
+            query: getMentorMeetingList,
+            variables: { id: meetingList[i] }
+          })
+
+          const mentorMeetingList = mentorListResponse?.data?.getMentorProfile?.meetingList;
+          const mentorId = mentorListResponse?.data?.getMentorProfile?.id;
+
+          // If mentee is on the list, then remove the mentee from the list
+          if (mentorMeetingList.includes(menteeId)) {
+            const menteeIndex = mentorMeetingList.indexOf(menteeId);
+            mentorMeetingList.splice(menteeIndex, 1);
+          }
+
+          const mentorDetails = {
+            id: mentorId,
+            meetingList: mentorMeetingList,
+          }
+
+          await client.graphql({
+            query: mutations.updateMentorMeetingList,
+            variables: { input: mentorDetails },
+          })
+        }
+        // 
+
         const profileResponse = await client.graphql({
           query: listMenteeProfiles,
-          variable: variables,
+          variables: variables,
         })
 
         const menteeProfileId = {
@@ -70,7 +118,7 @@ function Settings() {
       
         const preferencesResponse = await client.graphql({
           query: listMenteePreferences,
-          variable: variables,
+          variables: variables,
         })
 
         const menteePreferencesId = {
@@ -79,15 +127,15 @@ function Settings() {
 
         // console.log(menteeProfileId);
         // console.log(menteePreferencesId);
-        
-        await client.graphql({
-          query: mutations.deleteMenteeProfile,
-          variables: { input: menteeProfileId }
-        });
 
         await client.graphql({
           query: mutations.deleteMenteePreferences,
           variables: { input: menteePreferencesId }
+        });
+
+        await client.graphql({
+          query: mutations.deleteMenteeProfile,
+          variables: { input: menteeProfileId }
         });
 
         await deleteUser();
@@ -133,6 +181,13 @@ function Settings() {
             <p className="tw-font-dmsans mt-2 tw-text-[#5C667B]">
               Modify your profile settings and mentor preferences.
             </p>
+          </div>
+          <div className="col">
+            <button
+            onClick={() => {handleSignOut()}}
+            className="float-end tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-0.5 tw-py-2 tw-px-7 hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+            Sign out
+            </button>
           </div>
         </div>
 

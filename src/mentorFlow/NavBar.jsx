@@ -57,7 +57,7 @@ const MentorNavBar = ({ focused }) => {
     return (
         <nav className="navbar bg-white navbar-expand-lg">
             <div className="container-fluid">
-                <a className="navbar-brand" href="/">
+                <a className="navbar-brand" href="/mentorBookings">
                     <img className="align-middle" src={LOGO} alt=""/>
                 </a>
                 <button className="navbar-toggler justify-content-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@ const MentorNavBar = ({ focused }) => {
                     </span>
                 </button>
                 <div className="collapse navbar-collapse text-end justify-content-end" id="navbarTogglerDemo02">
-                    {( focused == "bookings" && 
+                    {( focused === "bookings" && 
                     <ul className="navbar-nav align-items-center">
                         {/* <li className="nav-item ">
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3"  href="/menteeHome">Home</a>
@@ -90,7 +90,7 @@ const MentorNavBar = ({ focused }) => {
                         </li>
                     </ul>
                     )}
-                    {( focused == "profile" && 
+                    {( focused === "profile" && 
                     <ul className="navbar-nav align-items-center">
                         <li className="nav-item">
                             <a style={{fontSize: "120%"}} className="nav-link tw-font-oceanwide mx-3" href="/mentorBookings">Bookings</a>

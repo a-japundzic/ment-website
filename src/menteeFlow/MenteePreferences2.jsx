@@ -77,9 +77,7 @@ const MenteePreferences2 = ({ settings=false }) => {
     const [state, setAppState] = useAppState();
     const { handleSubmit, 
             register,
-            control,
             formState: { errors },
-            reset
         } = useForm({ defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -102,7 +100,7 @@ const MenteePreferences2 = ({ settings=false }) => {
                     mentorshipFrequency: data.mentorshipFrequency,
                 };
             
-                const updateMenteePreferences = await client.graphql({
+                await client.graphql({
                     query: mutations.updateMenteePreferences,
                     variables: { input: menteeInput }
                 });

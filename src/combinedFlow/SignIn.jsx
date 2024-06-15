@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { ErrorMessage } from "@hookform/error-message"
 
 import LOGO from '../assets/logo.png'
 import IMG from '../assets/menteeLogInImg.png'
 import { useNavigate } from 'react-router-dom'
 
-
-import { useAppState } from "../state";
 import { useForm } from "react-hook-form";
 
 import { getCurrentUser, signIn } from 'aws-amplify/auth';
-import { signOut } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { listMenteePreferences, listMenteeProfiles, listMentorPreferences, listMentorProfiles } from '../graphql/queries';
 
@@ -34,20 +31,10 @@ const SignIn = () => {
         } = useForm({ mode: "onSubmit", criteriaMode: "all" });
     const navigate = useNavigate();
     
-
     const saveData = (data) => {
         setError("");
         handleSignIn.mutate(data);
     };
-
-
-    async function handleSignOut() {
-        try {
-            await signOut();
-        } catch (error) {
-            console.log('error signing out: ', error);
-        }
-    }
 
     // Fetches the username of the current authenticated user
     async function currentAuthenticatedUser() {
@@ -60,10 +47,10 @@ const SignIn = () => {
     }
 
     // Autosign in user if possible
-    useEffect(() => {
-        // currentAuthenticatedUser();
-        handleSignOut();
-    }, []);
+    // useEffect(() => {
+    //     currentAuthenticatedUser();
+    //     // handleSignOut();
+    // }, []);
 
     async function handleNavigation(username) {
         // Fetches the current user based off the username given above
@@ -87,7 +74,7 @@ const SignIn = () => {
                 const userProfile = response?.data?.listMenteeProfiles?.items;
                 const userProfileLen = userProfile.length;
 
-                if (userProfileLen == 0) {
+                if (userProfileLen === 0) {
                     navigate("/personalInfo", { replace: true });
                 } else if (!userProfile[0].values) {
                     navigate("/personalInfo2", { replace: true });
@@ -128,7 +115,7 @@ const SignIn = () => {
                 let userProfile = response?.data?.listMentorProfiles?.items;
                 let userProfileLen = userProfile.length;
 
-                if (userProfileLen == 0) {
+                if (userProfileLen === 0) {
                     navigate("/mentorPersonalInfo", { replace: true });
                 } else if (!userProfile[0].values) {
                     navigate("/mentorPersonalInfo2", { replace: true });
@@ -167,8 +154,7 @@ const SignIn = () => {
             let password = data.menteePassword;
 
             try {
-                const { isSignedIn, nextStep } = await signIn({ username, password });
-                console.log(nextStep);
+                const { nextStep } = await signIn({ username, password });
     
                 if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
                     sessionStorage.setItem("username", username);
@@ -177,12 +163,11 @@ const SignIn = () => {
                     currentAuthenticatedUser();
                 }
             } catch (error) {
-                error = error + '';
-                error = error.substring(error.indexOf(" ") + 1);
-
+                let format_error = error + '';
+                format_error = format_error.substring(format_error.indexOf(" ") + 1);
 
                 setLoading(false);
-                setError('Error signing in: ' + error);
+                setError('Error signing in: ' + format_error);
             }
         },
         onMutate: () => {
@@ -273,9 +258,11 @@ const SignIn = () => {
                                 <div>
                                     <p className="tw-font-dmsans">
                                         Don't have an account? 
+
                                         <a href='/mentorSignUp' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
                                         Mentor Sign Up
                                         </a>
+
                                         
                                         <a href='/menteeSignUp' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
                                         Mentee Sign Up

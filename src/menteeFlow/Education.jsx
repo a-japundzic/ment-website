@@ -77,7 +77,6 @@ const Education = ({ settings=false }) => {
     const { handleSubmit, 
         control,
         formState: { errors },
-        reset
     } = useForm({defaultValues: state, criteriaMode: "all" });
 
     const saveData = (data) => {
@@ -100,7 +99,7 @@ const Education = ({ settings=false }) => {
                     graduationYear: data.menteeGraduationYear.value,
                 };
             
-                const updateMentee = await client.graphql({
+                await client.graphql({
                     query: mutations.updateMenteeProfile,
                     variables: { input: menteeDetails }
                 });
@@ -119,34 +118,35 @@ const Education = ({ settings=false }) => {
         }
     })
 
+    // Ignore this, doesn't do anything
     // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    useEffect(() => {
-        if (isSuccess && !state && userProfile[0].length > 0) {
-            const resetMenteeUniversity = educationalInstitution.find(op => {
-                return op.value === userProfile[0].schoolName
-            })
+    // useEffect(() => {
+    //     if (isSuccess && !state && userProfile[0].length > 0) {
+    //         const resetMenteeUniversity = educationalInstitution.find(op => {
+    //             return op.value === userProfile[0].schoolName
+    //         })
 
-            const resetMenteeProgram = program.find(op => {
-                return op.value === userProfile[0].programOfStudy
-            })
+    //         const resetMenteeProgram = program.find(op => {
+    //             return op.value === userProfile[0].programOfStudy
+    //         })
 
-            const resetMenteeEducationalLevel = educationLevel.find(op => {
-                return op.value === userProfile[0].educationLevel
-            })
+    //         const resetMenteeEducationalLevel = educationLevel.find(op => {
+    //             return op.value === userProfile[0].educationLevel
+    //         })
 
-            const resetMenteeGraduationYear = graduationYear.find(op => {
-                return op.value === userProfile[0].graduationYear
-            })
+    //         const resetMenteeGraduationYear = graduationYear.find(op => {
+    //             return op.value === userProfile[0].graduationYear
+    //         })
 
 
-            reset({
-                menteeUniversity: resetMenteeUniversity,
-                menteeProgram: resetMenteeProgram,
-                menteeEducationalLevel: resetMenteeEducationalLevel,
-                menteeGraduationYear: resetMenteeGraduationYear,
-            })
-        }
-    }, [])
+    //         reset({
+    //             menteeUniversity: resetMenteeUniversity,
+    //             menteeProgram: resetMenteeProgram,
+    //             menteeEducationalLevel: resetMenteeEducationalLevel,
+    //             menteeGraduationYear: resetMenteeGraduationYear,
+    //         })
+    //     }
+    // }, [])
 
     const customStyles = {
         control: (provided, state) => ({

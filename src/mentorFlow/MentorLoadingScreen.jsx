@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import { useTransition, animated } from '@react-spring/web'
 import '../css/loader.css'
@@ -10,7 +10,6 @@ import IMG2 from '../assets/loadingScreen2.png'
 import IMG3 from '../assets/loadingScreen3.png'
 
 import '../css/checkbox.css'
-import { generateClient } from 'aws-amplify/api'
 
 const slides = [
     IMG1,

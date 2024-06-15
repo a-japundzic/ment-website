@@ -22,12 +22,12 @@ const PasswordVerification = () => {
     async function handleSignUpConfirmation(username, confirmationCode) {
         console.log(confirmationCode);
         try {
-            const { isSignUpComplete, nextStep } = await confirmSignUp({
+            await confirmSignUp({
                 username,
                 confirmationCode
             });
 
-            const signInOutput = await autoSignIn();
+            await autoSignIn();
 
             sessionStorage.clear();
             navigate('/personalInfo', { replace: true });

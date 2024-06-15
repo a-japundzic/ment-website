@@ -30,7 +30,7 @@ const MentorSignUp = () => {
 
     async function handleSignUp(username, email, password) {
         try {
-            const { isSignUpComplete, userId, nextStep } = await signUp({
+            await signUp({
                 username,
                 password,
                 options: {
@@ -46,10 +46,11 @@ const MentorSignUp = () => {
 
             navigate("/mentorPasswordVerification", { replace: true });
         } catch (error) {
-            error = error + '';
-            error = error.substring(error.indexOf(" ") + 1);
+            let format_error = error;
+            format_error = format_error + '';
+            format_error = format_error.substring(format_error.indexOf(" ") + 1);
 
-            setError('Error signing up: ' + error);
+            setError('Error signing up: ' + format_error);
         }
     }
 

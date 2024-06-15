@@ -95,7 +95,7 @@ const ProfileSetup1 = ({ settings=false }) => {
 
     const saveData = (data) => {
 
-        console.log("here");
+        // console.log("here");
         // set state
         setAppState({...state, ...data });
 
@@ -299,8 +299,10 @@ const ProfileSetup1 = ({ settings=false }) => {
         let ethnicityArrayFormatted = [];
 
         for (var i = 0; i < ethnicityArrayLen; ++i) {
+            // have to pass i to a variable first to avoid unsafe references
+            let index = i;
             ethnicityArrayFormatted.push(ethnicityOptions.find(op => {
-                return op.value === userProfile[0].ethnicity[i]
+                return op.value === userProfile[0].ethnicity[index]
             }));
         }
 
@@ -313,10 +315,13 @@ const ProfileSetup1 = ({ settings=false }) => {
         let languageArrayFormatted = [];
 
         for (var i = 0; i < languageArrayLen; ++i) {
+            let index = i;
             languageArrayFormatted.push(languageOptions.find(op => {
-                return op.value === userProfile[0].languages[i]
+                return op.value === userProfile[0].languages[index]
             }));
         }   
+
+        // console.log(languageArrayFormatted);
 
         return languageArrayFormatted;
     }

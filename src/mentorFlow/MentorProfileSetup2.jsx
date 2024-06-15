@@ -157,8 +157,11 @@ const MentorProfileSetup2 = ({ settings=false }) => {
 
             let i = 0;
             for (i = 0; i < valueArrLen; ++i) {
+                // Here to remove warning
+                let index = i;
+                // 
                 valueArrFormatted.push(valueOptions.find(op => {
-                    return op.value === userProfile[0].values[i];
+                    return op.value === userProfile[0].values[index];
                 }));
             }
         }

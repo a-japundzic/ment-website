@@ -30,19 +30,20 @@ const MenteeBookings = () => {
 
       const variables = {
         filter: {
-          owner: {
-            contains: username
-          }
+            owner: {
+                contains: username
+            }
         }
       };
 
       const menteeResponse = await client.graphql({
         query: listMenteeMeetingList,
-        variable: variables,
+        variables: variables,
       });
 
-      let menteeProfile = menteeResponse?.data?.listMenteeProfiles?.items[0];
+      // console.log(menteeResponse);
 
+      let menteeProfile = menteeResponse?.data?.listMenteeProfiles?.items[0];
       const meetingList = menteeProfile?.meetingList;
 
       if (!meetingList) {

@@ -38,7 +38,7 @@ const MentorBookings = () => {
 
       const mentorResponse = await client.graphql({
         query: listMentorMeetingList,
-        variable: variables,
+        variables: variables,
       });
 
       let mentorProfile = mentorResponse?.data?.listMentorProfiles?.items[0];
@@ -71,8 +71,10 @@ const MentorBookings = () => {
         variables: filterIds,
       });
 
+      // console.log(menteeResponse);
+
       const menteeList = menteeResponse?.data?.listMenteeProfiles?.items;
-      console.log(menteeList[0].identityId);
+      // console.log(menteeList[0].identityId);
       const menteeListLen = menteeList.length;
 
       for (var i = 0; i < menteeListLen; ++i){
