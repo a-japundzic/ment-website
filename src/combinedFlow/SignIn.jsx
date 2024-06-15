@@ -47,10 +47,9 @@ const SignIn = () => {
     }
 
     // Autosign in user if possible
-    // useEffect(() => {
-    //     currentAuthenticatedUser();
-    //     // handleSignOut();
-    // }, []);
+    useEffect(() => {
+        currentAuthenticatedUser();
+    }, []);
 
     async function handleNavigation(username) {
         // Fetches the current user based off the username given above
