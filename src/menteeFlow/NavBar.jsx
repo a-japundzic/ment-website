@@ -76,8 +76,8 @@ const NavBar = ({ focused }) => {
     return (
         <nav className="navbar bg-white navbar-expand-lg">
             <div className="container-fluid">
-                <a className="navbar-brand" href="/">
-                    <img className="align-middle" src={LOGO} alt="/menteeHome"/>
+                <a className="navbar-brand" href="/menteeHome">
+                    <img className="align-middle" src={LOGO} alt=""/>
                 </a>
                 <button className="navbar-toggler justify-content-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
                     <span onClick={handleClick} className="">
