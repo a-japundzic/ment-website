@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ErrorMessage } from "@hookform/error-message"
 
 import LOGO from '../assets/logo.png'
@@ -49,7 +49,7 @@ const SignIn = () => {
     // Autosign in user if possible
     useEffect(() => {
         currentAuthenticatedUser();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleNavigation(username) {
         // Fetches the current user based off the username given above
