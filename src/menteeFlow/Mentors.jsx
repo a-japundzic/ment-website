@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 import '../css/navbar.css'
 import { useQuery } from "@tanstack/react-query";
-import { menteeListMentorProfiles } from "../graphql/queries";
+import { listMenteePreferences, listMentorPreferences, menteeListMentorProfiles } from "../graphql/queries";
 import { getCurrentUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
 import { getUrl } from "aws-amplify/storage";
@@ -36,84 +36,84 @@ const Mentors = () => {
       currentAuthenticatedUser();
   }, [username]);
 
-  // const [data, setData] = useState([{}]);
+  const [data, setData] = useState([{}]);
 
     // Fetches the current user based off the username given above
-  // const topThree = useQuery({
-  //   queryKey: ["topThree"],
-  //   queryFn: async () => {
-  //     const variables = {
-  //         filter: {
-  //             owner: {
-  //                 contains: username
-  //             }
-  //         }
-  //     };
+  const topThree = useQuery({
+    queryKey: ["topThree"],
+    queryFn: async () => {
+      const variables = {
+          filter: {
+              owner: {
+                  contains: username
+              }
+          }
+      };
 
-  //     const menteeResponse = await client.graphql({
-  //         query: listMenteePreferences,
-  //         variables: variables
-  //     });
+      const menteeResponse = await client.graphql({
+          query: listMenteePreferences,
+          variables: variables
+      });
 
-  //     let menteePreferences = menteeResponse?.data?.listMenteePreferences?.items;
+      let menteePreferences = menteeResponse?.data?.listMenteePreferences?.items;
 
-  //     const mentorResponse = await client.graphql({
-  //         query: listMentorPreferences,
-  //     })
+      const mentorResponse = await client.graphql({
+          query: listMentorPreferences,
+      })
 
-  //     let mentorPreferences = mentorResponse?.data?.listMentorPreferences?.items;
+      let mentorPreferences = mentorResponse?.data?.listMentorPreferences?.items;
 
-  //     fetch("https://ment-api.us-east-1.elasticbeanstalk.com/matching", {
-  //       method: "POST",
-  //       headers: {
-  //           'Content-Type' : 'application/json'
-  //       },
-  //       body: JSON.stringify({ "matchObject": menteePreferences[0], "matchList": mentorPreferences })
-  //     }).then(
-  //       res => res.json()
-  //     ).then(
-  //       data => {
-  //           setData(data)
-  //          // console.log(data)
-  //       }
-  //     )
+      fetch("http://mentDev.pythonanywhere.com/matching", {
+        method: "POST",
+        headers: {
+            'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify({ "matchObject": menteePreferences[0], "matchList": mentorPreferences })
+      }).then(
+        res => res.json()
+      ).then(
+        data => {
+            setData(data)
+           // console.log(data)
+        }
+      )
 
-  //     const filterIds = {
-  //       filter: {
-  //         or: [
-  //           { id: {eq: data[0].id} }, 
-  //           { id: {eq: data[1].id} },
-  //           { id: {eq: data[2].id} },
-  //         ]
-  //       }
-  //     }
+      const filterIds = {
+        filter: {
+          or: [
+            { id: {eq: data[0].id} }, 
+            { id: {eq: data[1].id} },
+            { id: {eq: data[2].id} },
+          ]
+        }
+      }
 
-  //     //console.log(filterIds)
+      //console.log(filterIds)
       
-  //     const topThreeMatches = await client.graphql({
-  //         query: menteeListMentorProfiles,
-  //         variables: filterIds
-  //     });
+      const topThreeMatches = await client.graphql({
+          query: menteeListMentorProfiles,
+          variables: filterIds
+      });
 
-  //     // Retreiving top three mentors images
-  //     const topThreeList = topThreeMatches?.data?.listMentorProfiles?.items;
+      // Retreiving top three mentors images
+      const topThreeList = topThreeMatches?.data?.listMentorProfiles?.items;
 
-  //     for (var i = 0; i < 3; ++i){
-  //       const signedURL = await getUrl({ 
-  //         key: topThreeList[i].profilePicKey,
-  //         options: {
-  //           accessLevel: 'protected',
-  //           targetIdentityId: topThreeList[i].identityId,
-  //           validateObjectExistence: true,
-  //         }
-  //       });
+      for (var i = 0; i < 3; ++i){
+        const signedURL = await getUrl({ 
+          key: topThreeList[i].profilePicKey,
+          options: {
+            accessLevel: 'protected',
+            targetIdentityId: topThreeList[i].identityId,
+            validateObjectExistence: true,
+          }
+        });
 
-  //       topThreeList[i]["imageURL"] = signedURL.url.toString();
-  //     }
+        topThreeList[i]["imageURL"] = signedURL.url.toString();
+      }
 
-  //     return topThreeList;
-  //   }
-  // })
+      return topThreeList;
+    }
+  })
 
   // Fetches the current user based off the username given above
   const explore = useQuery({
@@ -149,20 +149,20 @@ const Mentors = () => {
       <NavBar focused={"home"} />
 
       <div className="container w-100">
-          {/* <div className="row gx-5 mt-5">
+          <div className="row gx-5 mt-5">
             <h2 className="tw-font-oceanwide">
               Here are your top 3 mentor matches!
             </h2>
-          </div> */}
+          </div>
 
-        {/* {( topThree.isLoading &&
+        {( topThree.isLoading &&
           <div className="d-flex justify-content-center mt-5">
             <Oval className="tw-duration-300" visible={true} color="#5685C9" secondaryColor='#5685C9' width="35" height="35" strokeWidth={4} strokeWidthSecondary={4} />
           </div>
-        )} */}
+        )}
 
 
-        {/* {( topThree.isSuccess && !topThree.isLoading &&
+        {( topThree.isSuccess && !topThree.isLoading &&
           <div className="row row-cols-3 d-flex justify-content-center mt-1 gy-3 mx-auto">
             {topThree.data.map((mentor, index) => (
               <div key={index} className="col col-lg-4" >
@@ -181,7 +181,7 @@ const Mentors = () => {
               </div>
             ))}
           </div>
-        )} */}
+        )}
 
         <div className="row gx-5 mt-5">
           <h2 className="tw-font-oceanwide">
