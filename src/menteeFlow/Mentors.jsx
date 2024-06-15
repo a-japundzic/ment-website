@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 import '../css/navbar.css'
 import { useQuery } from "@tanstack/react-query";
-import { listMenteePreferences, listMentorPreferences, menteeListMentorProfiles } from "../graphql/queries";
+import { menteeListMentorProfiles } from "../graphql/queries";
 import { getCurrentUser } from "aws-amplify/auth";
 import { generateClient } from "aws-amplify/api";
 import { getUrl } from "aws-amplify/storage";
@@ -36,7 +36,7 @@ const Mentors = () => {
       currentAuthenticatedUser();
   }, [username]);
 
-  const [data, setData] = useState([{}]);
+  // const [data, setData] = useState([{}]);
 
     // Fetches the current user based off the username given above
   // const topThree = useQuery({
