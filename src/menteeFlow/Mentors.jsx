@@ -63,7 +63,7 @@ const Mentors = () => {
 
       let mentorPreferences = mentorResponse?.data?.listMentorPreferences?.items;
 
-      fetch("http://mentDev.pythonanywhere.com/matching", {
+      fetch("https://mentDev.pythonanywhere.com/matching", {
         method: "POST",
         headers: {
             'Content-Type' : 'application/json'
