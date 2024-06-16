@@ -6,5 +6,5 @@
 
 @font-face {
   font-family: 'Oceanwide';
-  src: local('Oceanwide'), url("/src/fonts/Oceanwide-Semibold.otf") format('opentype');
+  src: local('Oceanwide'), url(./fonts/Oceanwide-Semibold.otf) format('opentype');
 }
