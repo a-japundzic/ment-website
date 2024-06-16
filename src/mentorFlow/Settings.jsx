@@ -92,7 +92,7 @@ function MentorSettings() {
           const menteeMeetingList = menteeListResponse?.data?.getMenteeProfile?.meetingList;
           const menteeId = menteeListResponse?.data?.getMenteeProfile?.id;
 
-          console.log(menteeMeetingList);
+          // console.log(menteeMeetingList);
 
           // If mentee is on the list, then remove the mentee from the list
           if (menteeMeetingList.includes(mentorId)) {
@@ -100,7 +100,7 @@ function MentorSettings() {
             menteeMeetingList.splice(mentorIndex, 1);
           }
 
-          console.log(menteeMeetingList);
+          // console.log(menteeMeetingList);
 
           const menteeDetails = {
             id: menteeId,

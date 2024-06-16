@@ -105,7 +105,7 @@ const LoadingScreen = () => {
 
     useEffect(() => {
         if (isSuccess && ("matchObject" in results)) {
-            console.log(results);
+            // console.log(results);
             fetch("/matching", {
                 method: "POST",
                 headers: {
@@ -117,7 +117,7 @@ const LoadingScreen = () => {
             ).then(
                 data => {
                     setReturnData(data)
-                    console.log(returnData)
+                    // console.log(returnData)
                 }
             )
         }

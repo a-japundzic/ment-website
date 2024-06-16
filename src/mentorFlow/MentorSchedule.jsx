@@ -14,6 +14,8 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Oval } from 'react-loader-spinner';
 import { InlineWidget } from 'react-calendly';
 
+// import '../css/padding.css'
+
 const client = generateClient();
 
 const MentorSchedule = ({ settings=false }) => {
@@ -140,7 +142,7 @@ const MentorSchedule = ({ settings=false }) => {
 
             <form onSubmit={handleSubmit(saveData)}>
             {isSuccess && !isLoading && (
-                <div className="container h-100">
+                <div style={{  paddingTop: watch("mentorCalendly") ? "100px" : "0px" }} className="container h-100">
                     {( !settings &&
                     <div className="row">
                         <div className="col">
@@ -206,7 +208,13 @@ const MentorSchedule = ({ settings=false }) => {
                                 <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                             </label>
                             <input 
-                                {...register("mentorCalendly", { required: "Calendly link is required" })}
+                                {...register("mentorCalendly", { 
+                                    required: "Calendly link is required",
+                                    pattern: {
+                                        value: /^https:\/\/calendly.com\/*/,
+                                        message: "Please enter a valid Calendly URL",
+                                     },
+                                 })}
                                 type="name" className="form-control tw-font-dmsans py-2" id="mentorCalendly" placeholder="https://calendly.com/your_scheduling_page" defaultValue={(userProfile[0]?.calendly) ? userProfile[0].calendly : ""}
                             />
                             <ErrorMessage 
@@ -218,7 +226,8 @@ const MentorSchedule = ({ settings=false }) => {
 
                         <div className="col offset-md-1">
                             <h6 className="tw-font-dmsans">Preview:</h6>
-                            <div className='container-fluid tw-h-[635px] border align-items-center'>
+                            {( (watch("mentorCalendly") || userProfile[0]?.calendly) && 
+                            <div className='container-fluid border align-items-center'>
 
                                     { watch("mentorCalendly") && (
                                         <InlineWidget url={watch("mentorCalendly")}></InlineWidget>
@@ -227,6 +236,7 @@ const MentorSchedule = ({ settings=false }) => {
                                         <InlineWidget url={(userProfile[0].calendly)}></InlineWidget>
                                     )}
                             </div>
+                            )}
                         </div>
                     </div>
                 </div>

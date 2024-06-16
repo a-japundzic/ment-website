@@ -190,7 +190,10 @@ const MentorPreferences2 = ({ settings=false }) => {
                         <div className="col">
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="mentorGoalInput" className="form-label tw-font-dmsans">What's your goal?</label>
+                                    <label htmlFor="mentorGoalInput" className="form-label tw-font-dmsans">
+                                    What's your goal?
+                                    <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                                    </label>
                                     <ul className="list-group mt-1" id="mentorGoalInput">
                                         <label className="list-group-item tw-font-dmsans">
                                             <input 

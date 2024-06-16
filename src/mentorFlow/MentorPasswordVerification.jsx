@@ -20,7 +20,7 @@ const MentorPasswordVerification = () => {
     const navigate = useNavigate();
 
     async function handleSignUpConfirmation(username, confirmationCode) {
-        console.log(confirmationCode);
+        // console.log(confirmationCode);
         try {
             await confirmSignUp({
                 username,

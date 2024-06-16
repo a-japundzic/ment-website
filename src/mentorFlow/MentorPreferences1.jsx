@@ -192,7 +192,10 @@ const MentorPreferences1 = ({ settings=false }) => {
                         <div className="col">
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="mentorTypeInput" className="form-label tw-font-dmsans">What mentorship are you offering?</label>
+                                    <label htmlFor="mentorTypeInput" className="form-label tw-font-dmsans">
+                                        What mentorship are you offering?
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                                    </label>
                                     <ul className="list-group mt-1" id="mentorTypeInput">
                                         <label className="list-group-item tw-font-dmsans">
                                             <input 
@@ -227,7 +230,10 @@ const MentorPreferences1 = ({ settings=false }) => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="mentorFrequency" className="form-label tw-font-dmsans">How frequently do you want to meet your students?</label>
+                                    <label htmlFor="mentorFrequency" className="form-label tw-font-dmsans">
+                                        How frequently do you want to meet your students?
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                                    </label>
                                     <ul className="list-group mt-1" id="mentorFrequency">
                                         <label className="list-group-item tw-font-dmsans">
                                             <input 

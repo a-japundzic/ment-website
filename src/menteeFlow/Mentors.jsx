@@ -75,7 +75,7 @@ const Mentors = () => {
       ).then(
         data => {
             setData(data)
-            console.log(data)
+            // console.log(data)
         }
       )
 
@@ -124,8 +124,8 @@ const Mentors = () => {
           query: menteeListMentorProfiles,
       });
 
-      // Retreiving top three mentors images
-      const exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
+      // Retreiving mentor images
+      let exploreList = topThreeMatches?.data?.listMentorProfiles?.items;
       const exploreListLen = exploreList.length;
 
       for (var i = 0; i < exploreListLen; ++i){

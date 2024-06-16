@@ -238,7 +238,7 @@ const MentorBookings = () => {
                           style={{
                               objectFit: "cover",
                           }}
-                          src={mentee.imageURL}
+                          src={mentee?.imageURL}
                           alt="Loading..."
                           className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
                       />
