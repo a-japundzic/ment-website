@@ -1,10 +1,16 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
+from flask_cors import CORS
+import jsonpickle
 
 app = Flask(__name__)
+CORS(app)
 
 #Members API router
-@app.route("/matching", methods=['POST'])
+@app.route("/matching", methods=['POST', 'OPTIONS'])
 def members():
+    if (request.method == "OPTIONS"):
+        return _build_cors_preflight_response()
+    
     # Get the posted data
     data = request.get_json()
 
@@ -66,7 +72,14 @@ def members():
         totalMatched = 0
         totalPrompts = 0
 
-    return topThree
+    return jsonpickle.encode(topThree)
+
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)

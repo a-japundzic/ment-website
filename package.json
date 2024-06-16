@@ -1,7 +1,6 @@
 {
   "name": "ment-website",
   "version": "0.1.0",
-  "proxy": "http://mentDev.pythonanywhere.com/",
   "private": true,
   "dependencies": {
     "@aws-amplify/cli": "^12.10.3",

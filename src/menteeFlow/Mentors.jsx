@@ -65,6 +65,7 @@ const Mentors = () => {
 
       fetch("https://mentDev.pythonanywhere.com/matching", {
         method: "POST",
+        mode: "cors",
         headers: {
             'Content-Type' : 'application/json'
         },
@@ -74,7 +75,7 @@ const Mentors = () => {
       ).then(
         data => {
             setData(data)
-           // console.log(data)
+            console.log(data)
         }
       )
 
