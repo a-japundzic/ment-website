@@ -10,7 +10,9 @@ import { useForm } from "react-hook-form";
 
 import { signUp } from 'aws-amplify/auth';
 
-const MenteeSignUp = () => {
+import "../css/radio.css"
+
+const SignUp = () => {
     const [error, setError] = useState('');
 
     const [state, setState] = useAppState();
@@ -25,10 +27,10 @@ const MenteeSignUp = () => {
 
     const saveData = (data) => {
         setState({...state, ...data });
-        handleSignUp(data.menteeEmail, data.menteeEmail, data.menteePassword);
+        handleSignUp(data.mentorEmail, data.mentorEmail, data.mentorPassword, data.role);
     };
 
-    async function handleSignUp(username, email, password) {
+    async function handleSignUp(username, email, password, role) {
         try {
             await signUp({
                 username,
@@ -36,17 +38,16 @@ const MenteeSignUp = () => {
                 options: {
                     userAttributes: {
                         email,
-                        "custom:user_type": "Mentee",
+                        "custom:user_type": role.toString(),
                     },
                     autoSignIn: true
                 }
             });
 
-            sessionStorage.setItem("username", username);
-
-            navigate("/passwordVerification", { replace: true });
+            navigate("/PasswordVerification", { replace: true, state: { username: username, role: role } });
         } catch (error) {
-            let format_error = error + '';
+            let format_error = error;
+            format_error = format_error + '';
             format_error = format_error.substring(format_error.indexOf(" ") + 1);
 
             setError('Error signing up: ' + format_error);
@@ -57,7 +58,7 @@ const MenteeSignUp = () => {
     return (
         <div>
             <div className="d-flex flex-column min-vh-100 justify-content-center align-items-center">
-                <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <nav className="navbar fixed-top navbar-expand-lg">
                     <div className="container-fluid">
                         <a className="navbar-brand" href="/">
                             <img className="align-middle" src={LOGO} alt=""/>
@@ -69,26 +70,26 @@ const MenteeSignUp = () => {
                     <div className="container h-100">
                         <div className="row gx-5 gy-5 align-items-center">
                             <div className="col">
-                                <h1 className="tw-font-oceanwide">Welcome to Ment</h1>
-                                <p className="tw-font-dmsans">Connect with a community of international students and receive personalized mentorship!</p>
+                                <h1 className="tw-font-poppins tw-text-[#074590]">Welcome to Ment</h1>
+                                <p className="tw-font-dmsans tw-text-[#074590]">AI-powered mentorship matchmaking to boost career opportunities and residency success for international students.</p>
                                 <div className="mt-4">
-                                    <label htmlFor="menteeEmail" className="form-label tw-font-dmsans">Email
+                                    <label htmlFor="mentorEmail" className="form-label tw-font-dmsans tw-text-[#074590]">Email
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <input 
-                                        {...register("menteeEmail", {
+                                        {...register("mentorEmail", {
                                             required: "Email is required",
                                             pattern: {
                                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                                 message: "Invalid email address"
                                             }
                                         })}
-                                        type="email" className="form-control tw-font-dmsans py-2" id="menteeEmail" placeholder="Your email address" 
+                                        type="email" className="form-control tw-font-dmsans py-2" id="mentorEmail" placeholder="Your email address" 
                                     />
 
                                     <ErrorMessage 
                                         errors={errors}
-                                        name="menteeEmail"
+                                        name="mentorEmail"
                                         render={({ messages }) => 
                                             messages &&
                                             Object.entries(messages).map(([type, message]) => (
@@ -98,25 +99,25 @@ const MenteeSignUp = () => {
                                     />
                                 </div>
                                 <div className="mt-3">
-                                    <label htmlFor="menteePassword" className="form-label tw-font-dmsans">Password
+                                    <label htmlFor="mentorPassword" className="form-label tw-font-dmsans tw-text-[#074590]">Password
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <input 
-                                        {...register("menteePassword", {
+                                        {...register("mentorPassword", {
                                             required: "Password is required",
                                             pattern: {
                                                 value: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/i,
                                                 message: "Should contain at least 8 characters, 1 number, and 1 special character"
                                             }
                                         })}
-                                        type="password" className="form-control tw-font-dmsans py-2" id="menteePassword" placeholder="Your password"
+                                        type="password"  className="form-control tw-font-dmsans py-2" id="mentorPassword" placeholder="Your password"
                                     />
-                                    {/* <div id="menteePassword" className="form-text tw-font-dmsans tw-text-[#5C667B]">
+                                    {/* <div id="mentorPassword" className="form-text tw-font-dmsans tw-text-[#5C667B]">
                                         Should contain at least 8 characters and 1 number
                                     </div> */}
                                     <ErrorMessage 
                                         errors={errors}
-                                        name="menteePassword"
+                                        name="mentorPassword"
                                         render={({ messages }) => 
                                             messages &&
                                             Object.entries(messages).map(([type, message]) => (
@@ -127,17 +128,17 @@ const MenteeSignUp = () => {
                                 </div>
                                 <div className="mt-3">
                                     <input 
-                                        {...register("menteePasswordRepeat", {
+                                        {...register("mentorPasswordRepeat", {
                                             required: "Repeat password is required",
                                         })}
-                                        type="password" className="form-control tw-font-dmsans py-2" id="menteePasswordRepeat" placeholder="Repeat password"
+                                        type="password" className="form-control tw-font-dmsans py-2" id="mentorPasswordRepeat" placeholder="Repeat password"
                                     />
-                                    {/* <div id="menteePassword" className="form-text tw-font-dmsans tw-text-[#5C667B]">
+                                    {/* <div id="mentorPassword" className="form-text tw-font-dmsans tw-text-[#5C667B]">
                                         Should contain at least 8 characters and 1 number
                                     </div> */}
                                     <ErrorMessage 
                                         errors={errors}
-                                        name="menteePasswordRepeat"
+                                        name="mentorPasswordRepeat"
                                         render={({ messages }) => 
                                             messages &&
                                             Object.entries(messages).map(([type, message]) => (
@@ -146,12 +147,36 @@ const MenteeSignUp = () => {
                                         }
                                     />
 
-                                    { watch("menteePasswordRepeat") !== watch("menteePassword") && getValues("menteePasswordRepeat") ? (
+                                    { watch("mentorPasswordRepeat") !== watch("mentorPassword") && getValues("mentorPasswordRepeat") ? (
                                          <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>Passwords do not match</small></p>
                                     ) : null}
                                 </div>
+
                                 <div className="mt-4">
-                                    <button type="submit" style={{fontSize: "120%"}} className="rounded w-100 tw-text-white tw-font-dmsans mt-3 tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-[#5685C9] tw-bg-[#5685C9] tw-border-solid hover:tw-bg-white tw-duration-300">
+                                    <label htmlFor="mentorCheck" className="form-label tw-font-dmsans tw-text-[#074590]">Choose your role
+                                        <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
+                                    </label>
+                                    <div className="form-check">
+                                         <label className="form-check-label tw-font-dmsans tw-text-[#074590]" htmlFor="menteeCheck">
+                                        <input 
+                                        {...register("role")}
+                                        value={"Mentee"}
+                                        className="form-check-input" type="radio" id="menteeCheck"/>
+                                            Mentee
+                                        </label>
+                                    </div>
+                                    <div className="form-check">
+                                        <label className="form-check-label tw-font-dmsans tw-text-[#074590]" htmlFor="mentorcheck">
+                                        <input 
+                                        {...register("role")}
+                                        value={"Mentor"}
+                                        className="form-check-input" type="radio" id="mentorCheck"/>
+                                            Mentor
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <button type="submit" style={{fontSize: "120%"}} className="rounded w-100 tw-text-white tw-font-dmsans mt-3 tw-border-[#074590] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-[#074590] tw-bg-[#074590] tw-border-solid hover:tw-bg-white tw-duration-300">
                                         Sign Up
                                     </button>
                                     <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{error}</small></p>
@@ -160,14 +185,14 @@ const MenteeSignUp = () => {
                                 <div>
                                     <p className="tw-font-dmsans">
                                         Already have an account? 
-                                        <a href='/' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
+                                        <a href='/' className="tw-font-dmsans tw-font-bold ms-1 tw-text-[#074590]">
                                             Log In
                                         </a>
                                     </p>    
                                 </div>
                                 {/* <div className="mt-5">
-                                    <label htmlFor="menteeLogInLabel" className="form-label tw-font-dmsans">Already have an account?</label>
-                                    <button id="menteeLogInLable" style={{fontSize: "120%"}} className="rounded w-100 tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-white tw-bg-white tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300" type="button">Log In</button>
+                                    <label htmlFor="mentorLogInLabel" className="form-label tw-font-dmsans">Already have an account?</label>
+                                    <button id="mentorLogInLable" style={{fontSize: "120%"}} className="rounded w-100 tw-text-[#5685C9] tw-font-dmsans tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-white tw-bg-white tw-border-solid hover:tw-bg-[#5685C9] tw-duration-300" type="button">Log In</button>
                                 </div> */}
                                 {/* <div className="mt-1">
                                     <button style={{fontSize: "120%"}} className="rounded w-100 tw-text-black tw-font-dmsans mt-3 tw-border-[#5C667B] tw-border-1 tw-py-1 tw-px-5 tw-bg-white tw-border-solid" type="button">Log in with Google placeholder</button>
@@ -185,4 +210,4 @@ const MenteeSignUp = () => {
     )
 }
 
-export default MenteeSignUp
+export default SignUp

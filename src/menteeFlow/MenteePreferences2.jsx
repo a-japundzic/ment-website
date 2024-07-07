@@ -230,7 +230,7 @@ const MenteePreferences2 = ({ settings=false }) => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeFrequency" className="form-label tw-font-dmsans">
+                                    <label htmlFor="meneteFrequency" className="form-label tw-font-dmsans">
                                         How frequently do you want to meet your mentor?
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>

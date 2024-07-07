@@ -88,7 +88,7 @@ const SignIn = () => {
 
                 const userPreferences = preferenceResponse?.data?.listMenteePreferences?.items;
                 
-                if (!userPreferences[0].mentorshipSkills) {
+                if (!userPreferences || !userPreferences[0].mentorshipSkills) {
                     navigate("/menteePreferences", { replace: true });
                 } else if (!userPreferences[0].mentorshipType) {
                     navigate("/menteePreferences2", { replace: true });
@@ -177,7 +177,7 @@ const SignIn = () => {
     return (
         <div>
             <div className="d-flex flex-column min-vh-100 justify-content-center align-items-center">
-                <nav className="navbar fixed-top bg-white navbar-expand-lg">
+                <nav className="navbar fixed-top navbar-expand-lg">
                     <div className="container-fluid">
                         <a className="navbar-brand" href="/">
                             <img className="align-middle" src={LOGO} alt=""/>
@@ -189,9 +189,9 @@ const SignIn = () => {
                     <div className="container h-100">
                         <div className="row gx-5 gy-5 align-items-center">
                             <div className="col">
-                                <h1 className="tw-font-oceanwide tw-text-center">Sign In</h1>
+                                <h1 className="tw-font-poppins tw-text-center tw-text-[#074590]">Sign In</h1>
                                 <div className="mt-4">
-                                    <label htmlFor="menteeEmail" className="form-label tw-font-dmsans">Email
+                                    <label htmlFor="menteeEmail" className="form-label tw-text-[#074590] tw-font-dmsans">Email
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <input 
@@ -217,7 +217,7 @@ const SignIn = () => {
                                     />
                                 </div>
                                 <div className="mt-3">
-                                    <label htmlFor="menteePassword" className="form-label tw-font-dmsans">Password
+                                    <label htmlFor="menteePassword" className="form-label tw-text-[#074590] tw-font-dmsans">Password
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <input 
@@ -246,7 +246,7 @@ const SignIn = () => {
                                 </div>
                                 <div className="mt-4">
                                     
-                                    <button type="submit" style={{fontSize: "120%"}} className="rounded tw-flex tw-justify-center w-100 tw-text-white tw-font-dmsans mt-3 tw-border-[#5685C9] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-[#5685C9] tw-bg-[#5685C9] tw-border-solid hover:tw-bg-white tw-duration-300">
+                                    <button type="submit" style={{fontSize: "120%"}} className="rounded tw-flex tw-justify-center w-100 tw-text-white tw-font-dmsans mt-3 tw-border-[#074590] tw-border-3 tw-py-1 tw-px-5 hover:tw-text-[#074590] tw-bg-[#074590] tw-border-solid hover:tw-bg-white tw-duration-300">
                                         {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
                                         {!loading && ("Sign In")}
                                     </button>
@@ -258,13 +258,8 @@ const SignIn = () => {
                                     <p className="tw-font-dmsans">
                                         Don't have an account? 
 
-                                        <a href='/mentorSignUp' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
-                                        Mentor Sign Up
-                                        </a>
-
-                                        
-                                        <a href='/menteeSignUp' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#5685C9]">
-                                        Mentee Sign Up
+                                        <a href='/signUp' className="tw-font-dmsans tw-font-bold ms-1  tw-text-[#074590]">
+                                        Sign Up
                                         </a>
                                     </p>    
                                 </div>

@@ -136,30 +136,17 @@ const ProfileSetup2 = ({ settings=false }) => {
         }
     })
 
-    // Ignore this, doesn't do anything
-    // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    // useEffect(() => {
-    //     if (isSuccess && !state && userProfile[0].length > 0) {
-    //         reset({
-    //             menteeValues: formatValues().map(ele => ele),
-    //             menteeInstagram: userProfile[0].instagram,
-    //             menteeFacebook: userProfile[0].facebook,
-    //             menteeLinkedIn: userProfile[0].linkedin,
-    //         })
-    //     }
-    // }, [])
-
     // Formats the multiple select questions to settable default values
     function formatValues() {
         let valueArrFormatted = [];
-        if (userProfile[0].values) {
-            var valueArrLen = userProfile[0].values.length;
+        if (userProfile[0]?.values) {
+            var valueArrLen = userProfile[0]?.values.length;
 
             for (var i = 0; i < valueArrLen; ++i) {
                 // Have to do this to remove "unsafe reference to i" error
                 let index = i;
                 valueArrFormatted.push(valueOptions.find(op => {
-                    return op.value === userProfile[0].values[index]
+                    return op.value === userProfile[0]?.values[index]
                 }));
             }
         }
@@ -260,7 +247,7 @@ const ProfileSetup2 = ({ settings=false }) => {
     return (
         <div className={ settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
             {( !settings && 
-            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+            <nav className="navbar fixed-top navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
                         <img className="align-middle" src={LOGO} alt=""/>
@@ -328,7 +315,7 @@ const ProfileSetup2 = ({ settings=false }) => {
                                             rules={{
                                                 required: "Answer Required",
                                             }}
-                                            defaultValue={(userProfile.length > 0) ? formatValues().map(ele => ele) : null}
+                                            defaultValue={(userProfile?.length > 0) ? formatValues().map(ele => ele) : null}
                                             name="menteeValues"
                                             render={({
                                                 field: { onChange, onBlur, value, name, ref },
@@ -414,7 +401,7 @@ const ProfileSetup2 = ({ settings=false }) => {
                                             className="form-control tw-font-dmsans py-2" 
                                             id="menteeInstagram" 
                                             placeholder="https://www.instagram.com/username/" 
-                                            defaultValue={(userProfile.length > 0) ? userProfile[0].instagram : ""}
+                                            defaultValue={(userProfile?.length > 0) ? userProfile[0]?.instagram : ""}
                                         />
 
                                         <ErrorMessage 
@@ -441,7 +428,7 @@ const ProfileSetup2 = ({ settings=false }) => {
                                             className="form-control tw-font-dmsans py-2" 
                                             id="menteeFacebook" 
                                             placeholder="https://www.facebook.com/username/" 
-                                            defaultValue={(userProfile.length > 0) ? userProfile[0].facebook : ""}
+                                            defaultValue={(userProfile?.length > 0) ? userProfile[0].facebook : ""}
                                         />
 
                                         <ErrorMessage 
@@ -498,7 +485,7 @@ const ProfileSetup2 = ({ settings=false }) => {
 
                             <div className="row text-center mt-4">
                                 <div className="col">
-                                    <p className="tw-font-dmsans tw-font-bold">{(userProfile.length > 0) ? userProfile[0].firstName : ""} {(userProfile.length > 0) ? userProfile[0].lastName : ""}</p> 
+                                    <p className="tw-font-dmsans tw-font-bold">{(userProfile?.length > 0) ? userProfile[0].firstName : ""} {(userProfile?.length > 0) ? userProfile[0].lastName : ""}</p> 
                                 </div>
                             </div>    
                         </div>

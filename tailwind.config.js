@@ -6,6 +6,7 @@ module.exports = {
     fontFamily: {
       oceanwide: ["Oceanwide"],
       dmsans: ["DM Sans"],
+      poppins: ["Poppins"]
     },
     borderWidth: {
       DEFAULT: '1px',

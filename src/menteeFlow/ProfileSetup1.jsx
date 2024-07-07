@@ -326,27 +326,6 @@ const ProfileSetup1 = ({ settings=false }) => {
         return languageArrayFormatted;
     }
 
-    // If the page is refreshed, and state is cleared, set default values from the query (this took forever, but got it done)
-    // useEffect(() => {
-    //     if (isSuccess && !state && userProfile[0].length > 0) {
-    //         const resetMenteeGender = genderOptions.find(op => {
-    //             return op.value === userProfile[0].gender
-    //         })
-
-    //         console.log("test");
-
-    //         reset({
-    //             menteeFirstName: userProfile[0].firstName,
-    //             menteeLastName: userProfile[0].lastName,
-    //             menteeGender: resetMenteeGender,
-    //             menteeAge: userProfile[0].menteeAge,
-    //             menteeEthnicity: formatEthnicity().map(ele => ele),
-    //             menteeLanguage: formatLanguage().map(ele => ele),
-    //         })
-    //     }
-    // }, [])
-
-
     // Sets customer styles of drop down menu
     const customStyles = {
         control: (provided, state) => ({
@@ -359,14 +338,15 @@ const ProfileSetup1 = ({ settings=false }) => {
 
     // Survey questions
     const genderOptions = [
+        { value: 'Prefer not to respond', label: 'Prefer not to respond' },
         { value: 'Woman', label: 'Woman'},
         { value: 'Man', label: 'Man'},
         { value: 'Tansgender', label: 'Transgender'},
         { value: 'Non-Binary/Non-conforming', label: 'Non-Binary/Non-conforming'},
-        { value: 'Prefer not to respond', label: 'Prefer not to respond' }
     ]
 
     const ethnicityOptions = [
+        { value: 'Prefer not to answer', label: 'Prefer not to answer' },
         { value: 'First Nation or North American Indian', label: 'First Nation or North American Indian'},
         { value: 'Alaskan Native', label: 'Alaskan Native'},
         { value: 'Inuit', label: 'Inuit'},
@@ -383,7 +363,6 @@ const ProfileSetup1 = ({ settings=false }) => {
         { value: 'East and Southeast Asian origins', label: 'East and Southeast Asian origins (e.g., Chinese, Filipino)' },
         { value: 'Other Asian origins', label: 'Other Asian origins' },
         { value: 'Oceania origins', label: 'Oceania origins (e.g., Hawaiian, Samoan)' },
-        { value: 'Prefer not to answer', label: 'Prefer not to answer' },
     ]
 
     const languageOptions = [
@@ -434,7 +413,7 @@ const ProfileSetup1 = ({ settings=false }) => {
         <div className={settings ? "d-flex flex-column" : "d-flex flex-column min-vh-100 justify-content-center" }>
 
             {( !settings &&
-            <nav className="navbar fixed-top bg-white navbar-expand-lg">
+            <nav className="navbar fixed-top navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
                         <img className="align-middle" src={LOGO} alt=""/>
@@ -460,16 +439,16 @@ const ProfileSetup1 = ({ settings=false }) => {
                     {( !settings &&
                     <div className="row gx-5 mt-5">
                         <div className="col">
-                            <h1 className="tw-font-oceanwide">Hi! Let’s set up your profile.</h1>
+                            <h1 className="tw-font-oceanwide tw-text-[#074590]">Hi! Let’s set up your profile.</h1>
                         </div>
                         <div className="col">
-                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#5685C9] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#5685C9] tw-bg-[#5685C9] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
+                            <button type="submit" className="float-end ms-2 tw-font-bold tw-text-white tw-font-dmsans tw-border-[#074590] tw-border-2 tw-py-3 tw-px-5 tw-font hover:tw-text-[#074590] tw-bg-[#074590] rounded tw-border-solid hover:tw-bg-white tw-duration-300">
                                 {loading && (<Oval className="tw-duration-300" visible={true} color="#ffffff" secondaryColor='#ffffff' width="24" height="24" strokeWidth={4} strokeWidthSecondary={4} />)}
                                 {!loading && ("Next")}
                             </button>
                         </div>
                        
-                        <p className="tw-font-dmsans tm-text-[#5C667B] mt-2 tw-text-[#5C667B] ">Help us get to know you better.</p>
+                        <p className="tw-font-dmsans mt-2 tw-text-[#75adfe]">Help us get to know you better.</p>
                     </div>
                     )}
 
@@ -492,7 +471,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                     <div className="row gx-5 gy-5 align-items-center mt-2">
                         <div className="col">
                             <div className="row">
-                                <label htmlFor="menteeFirstNameInput" className="form-label tw-font-dmsans">My name is
+                                <label htmlFor="menteeFirstNameInput" className="form-label tw-font-dmsans tw-text-[#074590]">My name is
                                     <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                 </label>
                                 <div className="col">
@@ -522,7 +501,7 @@ const ProfileSetup1 = ({ settings=false }) => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeGenderInput" className="form-label tw-font-dmsans">My gender is
+                                    <label htmlFor="menteeGenderInput" className="form-label tw-font-dmsans tw-text-[#074590]">My gender is
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <div className="tw-font-dmsans">
@@ -563,7 +542,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                                     </div>
                                 </div>
                                 <div className="col">
-                                    <label htmlFor="menteeAgeInput" className="form-label tw-font-dmsans">My age is
+                                    <label htmlFor="menteeAgeInput" className="form-label tw-font-dmsans tw-text-[#074590]">My age is
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <div className="">
@@ -598,7 +577,7 @@ const ProfileSetup1 = ({ settings=false }) => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeEthnicityInput" className="form-label tw-font-dmsans">My ethnicity is
+                                    <label htmlFor="menteeEthnicityInput" className="form-label tw-font-dmsans tw-text-[#074590]">My ethnicity is
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <div className="tw-font-dmsans">
@@ -643,7 +622,7 @@ const ProfileSetup1 = ({ settings=false }) => {
 
                             <div className="row mt-4">
                                 <div className="col">
-                                    <label htmlFor="menteeLanguage" className="form-label tw-font-dmsans">I can speak
+                                    <label htmlFor="menteeLanguage" className="form-label tw-font-dmsans tw-text-[#074590]">I can speak
                                         <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                                     </label>
                                     <div className="tw-font-dmsans">
@@ -690,7 +669,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                         </div>
                         <div className="col offset-md-1">
                             {/* <img className="tw-float-right img-fluid" src={FILLER} alt=""></img> */}
-                            <label htmlFor="menteeProfilePic" className="form-label tw-font-dmsans">Upload profile picture
+                            <label htmlFor="menteeProfilePic" className="form-label tw-font-dmsans tw-text-[#074590]    ">Upload profile picture
                                 <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                             </label>
                             <div id="menteeProfilePic" name="menteeProfilePic" className="border border-light tw-w-96 tw-h-96 d-flex justify-content-center align-items-center">
@@ -739,7 +718,7 @@ const ProfileSetup1 = ({ settings=false }) => {
                                         src={profileImgUrl}
                                         ref={uploadedImage}
                                         alt={(userProfile.length > 0) ? "Loading..." : "Click Me"}
-                                        className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
+                                        className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans tw-text-[#074590] d-flex justify-content-center align-items-center"
                                     />
                                 </div>
                             </div>

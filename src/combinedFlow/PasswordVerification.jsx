@@ -10,16 +10,17 @@ import IMG from '../assets/menteeLogInImg.png'
 import { confirmSignUp } from 'aws-amplify/auth';
 import { autoSignIn } from 'aws-amplify/auth';
 
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 
-const MentorPasswordVerification = () => {
-    const [username] = useState(sessionStorage.getItem("username"));
+const PasswordVerification = () => {
+    const {state} = useLocation();
     const [error, setError] = useState('');
 
     const navigate = useNavigate();
 
-    async function handleSignUpConfirmation(username, confirmationCode) {
+    async function handleSignUpConfirmation(confirmationCode) {
+        const username = state?.username;
         // console.log(confirmationCode);
         try {
             await confirmSignUp({
@@ -29,8 +30,11 @@ const MentorPasswordVerification = () => {
 
             await autoSignIn();
 
-            sessionStorage.clear();
-            navigate('/mentorPersonalInfo', { replace: true });
+            if (state?.role === "Mentee") {
+                navigate('/personalInfo', { replace: true });
+            } else if (state?.role === "Mentor") {
+                navigate('/mentorPersonalInfo', { replace: true });
+            }
         } catch (error) {
             let errorStr = error + '';
             errorStr = errorStr.substring(errorStr.indexOf(" ") + 1);
@@ -60,7 +64,7 @@ const MentorPasswordVerification = () => {
                     <div className="col">
                         <div className="row tw-text-center">
                             <h1 className="tw-font-oceanwide">Verify your email address</h1>
-                            <p className="tw-font-dmsans">We emailed you a six-digit code to {username}. Enter the code below to confirm your email address.</p>
+                            <p className="tw-font-dmsans">We emailed you a six-digit code to {state?.username}. Enter the code below to confirm your email address.</p>
                         </div>
                         <div className="row tw-font-dmsans" style={{marginTop: '100px'}}>
                             <VerificationInput 
@@ -74,7 +78,7 @@ const MentorPasswordVerification = () => {
                                     characterSelected: "character--selected",
                                     characterFilled: "character--filled",
                                 }}
-                                onComplete={value => handleSignUpConfirmation(username, value)}
+                                onComplete={value => handleSignUpConfirmation(value)}
                                 
                             />
                             <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{error}</small></p>
@@ -89,4 +93,4 @@ const MentorPasswordVerification = () => {
     )
 }
 
-export default MentorPasswordVerification
+export default PasswordVerification
