@@ -164,7 +164,7 @@ const MenteePreferences = ({ settings=false }) => {
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
-                        <img className="align-middle" src={LOGO} alt=""/>
+                        <img className="align-middle tw-w-[139px] tw-h-[70px] image-fluid" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>

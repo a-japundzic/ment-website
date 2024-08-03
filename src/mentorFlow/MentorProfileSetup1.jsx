@@ -432,7 +432,7 @@ const MentorProfileSetup1 = ({ settings=false }) => {
             <nav className="navbar fixed-top bg-white navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
-                        <img className="align-middle" src={LOGO} alt=""/>
+                        <img className="align-middle tw-w-[139px] tw-h-[70px] image-fluid" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
@@ -734,11 +734,15 @@ const MentorProfileSetup1 = ({ settings=false }) => {
                                         }}
                                         src={profileImgUrl}
                                         ref={uploadedImage}
-                                        alt={(userProfile.length > 0) ? "Loading..." : "Click Me"}
+                                        alt={(userProfile.length > 0) ? "Loading..." : "Add profile picture"}
                                         className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans d-flex justify-content-center align-items-center text-secondary"
                                     />
                                 </div>
                             </div>
+
+                            <div>
+                                <p className='tw-font-dmsans tw-text-[#75adfe]'>Tip: To upload, click the circle</p>
+                            </div>   
 
                             <ErrorMessage 
                                 errors={errors}

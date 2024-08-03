@@ -416,7 +416,7 @@ const ProfileSetup1 = ({ settings=false }) => {
             <nav className="navbar fixed-top navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
-                        <img className="align-middle" src={LOGO} alt=""/>
+                        <img className="align-middle tw-w-[139px] tw-h-[70px] image-fluid" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
@@ -668,11 +668,11 @@ const ProfileSetup1 = ({ settings=false }) => {
  
                         </div>
                         <div className="col offset-md-1">
-                            {/* <img className="tw-float-right img-fluid" src={FILLER} alt=""></img> */}
                             <label htmlFor="menteeProfilePic" className="form-label tw-font-dmsans tw-text-[#074590]    ">Upload profile picture
                                 <p className="tw-font-dmans tw-text-[#DE5840] tw-inline-block tw--mb-4">*</p>
                             </label>
-                            <div id="menteeProfilePic" name="menteeProfilePic" className="border border-light tw-w-96 tw-h-96 d-flex justify-content-center align-items-center">
+                            <div id="menteeProfilePic" name="menteeProfilePic" className="border border-light tw-w-96 tw-h-96">
+                                <div className='w-100 h-100 d-flex justify-content-center align-items-center'>
                                     <Controller
                                         control={control}
                                         {...register("menteeProfilePicture", {
@@ -710,24 +710,32 @@ const ProfileSetup1 = ({ settings=false }) => {
                                     />
                                     
 
-                                <div onClick={() => imageUploader.current.click()} className="border border-primary-subtle border-4 w-75 h-75 rounded-circle d-flex justify-content-center align-items-center">
-                                    <img 
-                                        style={{
-                                            objectFit: "cover",
-                                        }}
-                                        src={profileImgUrl}
-                                        ref={uploadedImage}
-                                        alt={(userProfile.length > 0) ? "Loading..." : "Click Me"}
-                                        className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans tw-text-[#074590] d-flex justify-content-center align-items-center"
-                                    />
+                                    <div onClick={() => imageUploader.current.click()} className="border border-primary-subtle border-4 w-75 h-75 rounded-circle d-flex justify-content-center align-items-center">
+                                        <img 
+                                            style={{
+                                                objectFit: "cover",
+                                            }}
+                                            src={profileImgUrl}
+                                            ref={uploadedImage}
+                                            alt={(userProfile.length > 0) ? "Loading..." : "Add profile picture"}
+                                            className="img-fluid w-100 h-100 rounded-circle tw-font-dmsans tw-text-[#074590] d-flex justify-content-center align-items-center"
+                                        />
+                                    </div>
+
                                 </div>
                             </div>
+
+                            <div>
+                                <p className='tw-font-dmsans tw-text-[#75adfe]'>Tip: To upload, click the circle</p>
+                            </div>   
 
                             <ErrorMessage 
                                 errors={errors}
                                 name="menteeProfilePicture"
                                 render={({ message }) => <p className="tw--mb-4 tw-font-dmsans tw-text-[#DE5840]"><small>{message}</small></p>}
-                            />            
+                            />      
+
+            
                         </div>
                     </div>
                 </div>

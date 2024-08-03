@@ -15,7 +15,7 @@
     content: "";
     width: 1px;
     height: 25px;
-    background-color: #5685C9;
+    background-color: #074590;
     display: block;
     position: absolute;
     top: 50%;
@@ -27,8 +27,8 @@
 .character {
     border-width: 2px;
     border-radius: 8px;
-    border-color: #5685C9;
-    color: #5685C9;
+    border-color: #074590;
+    color: #074590;
     background-color: white;
     height: 50px;
     width: 50px;

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useForm } from "react-hook-form";
 
-import { getCurrentUser, signIn } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, signOut } from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/api';
 import { listMenteePreferences, listMenteeProfiles, listMentorPreferences, listMentorProfiles } from '../graphql/queries';
 
@@ -157,7 +157,7 @@ const SignIn = () => {
     
                 if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
                     sessionStorage.setItem("username", username);
-                    navigate("/passwordVerification", { replace: true });
+                    navigate("/passwordVerification", { replace: true, state: { username: username } });
                 } else {
                     currentAuthenticatedUser();
                 }
@@ -180,7 +180,7 @@ const SignIn = () => {
                 <nav className="navbar fixed-top navbar-expand-lg">
                     <div className="container-fluid">
                         <a className="navbar-brand" href="/">
-                            <img className="align-middle" src={LOGO} alt=""/>
+                            <img className="tw-w-[139px] tw-h-[70px] image-fluid align-middle" src={LOGO} alt=""/>
                         </a>
                     </div>
                 </nav>

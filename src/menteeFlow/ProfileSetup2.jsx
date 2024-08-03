@@ -250,7 +250,7 @@ const ProfileSetup2 = ({ settings=false }) => {
             <nav className="navbar fixed-top navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
-                        <img className="align-middle" src={LOGO} alt=""/>
+                        <img className="align-middle tw-w-[139px] tw-h-[70px] image-fluid" src={LOGO} alt=""/>
                     </a>
                 </div>
             </nav>
